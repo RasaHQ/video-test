@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Rasa 2026 Video Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a12;
+      --accent: #c084fc;
+      --accent-brand: #5a17ee;
+      --accent-warm: #f59e0b;
+      --text: #eeeef2;
+      --text-dim: #78788a;
+      --text-muted: #48485a;
+      --display: 'Instrument Serif', Georgia, serif;
+      --body: 'Outfit', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      font-family: var(--body);
+      background: #000;
+      color: var(--text);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      height: 100vh;
+      height: 100dvh;
+      cursor: default;
+      user-select: none;
+    }
+
+    /* ── Grain ──────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 180px;
+    }
+
+    /* ── Scroll Container ───────────────────────── */
+    .reel-container {
+      height: 100vh;
+      height: 100dvh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .reel-container::-webkit-scrollbar { display: none; }
+
+    /* ── Each Reel Slide ────────────────────────── */
+    .reel {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* ── Video ──────────────────────────────────── */
+    .reel video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    .reel.active video {
+      opacity: 1;
+    }
+
+    /* ── Ambient Glow ───────────────────────────── */
+    .reel-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .reel.active .reel-glow {
+      opacity: 1;
+    }
+
+    .reel-glow::before {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      left: -10%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(ellipse, rgba(90,23,238,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: glow-drift 8s ease-in-out infinite alternate;
+    }
+
+    .reel-glow::after {
+      content: '';
+      position: absolute;
+      top: -15%;
+      right: -10%;
+      width: 50%;
+      height: 50%;
+      background: radial-gradient(ellipse, rgba(192,132,252,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: glow-drift 10s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes glow-drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, -20px) scale(1.1); }
+    }
+
+    /* ── Gradient Overlays ──────────────────────── */
+    .reel-overlay-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 180px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .reel-overlay-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 320px;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ── Content Overlay ────────────────────────── */
+    .reel-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      padding: 0 2.5rem 3rem;
+      transform: translateY(12px);
+      opacity: 0;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+    }
+
+    .reel.active .reel-content {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .reel-category {
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .reel-category::before {
+      content: '';
+      width: 16px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    .reel-title {
+      font-family: var(--display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 400;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .reel-desc {
+      font-family: var(--body);
+      font-size: 0.9375rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+      max-width: 480px;
+    }
+
+    /* ── Pause Indicator ────────────────────────── */
+    .pause-indicator {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .pause-indicator.visible {
+      opacity: 1;
+    }
+
+    .pause-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: scale(0.8);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .pause-indicator.visible .pause-icon {
+      transform: scale(1);
+    }
+
+    .pause-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+
+    /* ── Rasa Logo Watermark ────────────────────── */
+    .logo-watermark {
+      position: fixed;
+      top: 1.75rem;
+      left: 2rem;
+      z-index: 50;
+      opacity: 0.4;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .logo-watermark svg {
+      height: 22px;
+      width: auto;
+    }
+
+    /* ── Top Right Controls ─────────────────────── */
+    .top-controls {
+      position: fixed;
+      top: 1.5rem;
+      right: 2rem;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+    }
+
+    .control-btn:hover {
+      background: rgba(255,255,255,0.14);
+      color: #fff;
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .control-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ── Progress Rail (Right Edge) ──────────────── */
+    .progress-rail {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .progress-dot {
+      width: 3px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.15);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      height: 20px;
+    }
+
+    .progress-dot:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .progress-dot.active {
+      height: 40px;
+      background: var(--accent);
+      box-shadow: 0 0 12px rgba(192,132,252,0.4);
+    }
+
+    /* ── Video Progress Bar ──────────────────────── */
+    .video-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      z-index: 5;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .video-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-brand), var(--accent));
+      border-radius: 0 2px 2px 0;
+      transition: width 0.25s linear;
+    }
+
+    /* ── Scroll Hint ────────────────────────────── */
+    .scroll-hint {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: hint-in 0.8s ease 1.5s forwards;
+      pointer-events: none;
+    }
+
+    .scroll-hint.hidden {
+      opacity: 0 !important;
+      transition: opacity 0.4s ease;
+    }
+
+    .scroll-hint-text {
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .scroll-hint-arrow {
+      width: 20px;
+      height: 20px;
+      color: rgba(255,255,255,0.25);
+      animation: bounce-down 1.5s ease-in-out infinite;
+    }
+
+    @keyframes hint-in {
+      to { opacity: 1; }
+    }
+
+    @keyframes bounce-down {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(5px); }
+    }
+
+    /* ── Counter ────────────────────────────────── */
+    .reel-counter {
+      position: fixed;
+      bottom: 2.25rem;
+      right: 2rem;
+      z-index: 50;
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.05em;
+    }
+
+    .reel-counter .current {
+      color: rgba(255,255,255,0.6);
+      font-weight: 600;
+    }
+
+    /* ── Click Zone ─────────────────────────────── */
+    .reel-click-zone {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      cursor: pointer;
+    }
+
+    /* ── Responsive ─────────────────────────────── */
+    @media (max-width: 768px) {
+      .reel-content { padding: 0 1.5rem 2.5rem; }
+      .logo-watermark { top: 1.25rem; left: 1.25rem; }
+      .logo-watermark svg { height: 18px; }
+      .top-controls { top: 1.25rem; right: 1.25rem; }
+      .control-btn { width: 36px; height: 36px; }
+      .control-btn svg { width: 16px; height: 16px; }
+      .progress-rail { right: 1rem; }
+      .reel-counter { right: 1rem; bottom: 1.5rem; }
+      .reel-desc { font-size: 0.8125rem; }
+      .scroll-hint { bottom: 1.25rem; }
+    }
+
+    @media (max-width: 480px) {
+      .reel-content { padding: 0 1.25rem 2rem; }
+      .reel-title { font-size: 1.75rem; }
+      .progress-rail { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ LOGO WATERMARK ═══ -->
+  <div class="logo-watermark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 287.8 141"><defs><style>.wm{fill:#fff;}</style></defs><g><path class="wm" d="M209.4,29V79.11h12V64h26V79h12V29Zm38,23h-26V41h26Z"/><polygon class="wm" points="198.4 56.5 198.4 69 198.4 79 149.4 79 149.4 67 186.4 67 186.4 60 149.4 60 149.4 49 149.4 36.5 149.4 29 198.4 29 198.4 41 161.4 41 161.4 48 198.4 48 198.4 56.5 198.4 56.5"/><path class="wm" d="M88.4,29V79.11h12V64h26V79h12V29Zm38,23h-26V41h26Z"/><path class="wm" d="M61.31,59.94l15.36-5.59.73-.29V29h-49V79H40.24V67.59l9-3.26L62.79,79H77.61Zm-21-5.12V41H65.4v4.68Z"/><path class="wm" d="M246.05,90.54H270V18.44H17.84v72.1h180L246,114.36V90.54ZM4.4,5h279v99H259.49v32l-64.77-32H4.4Z"/></g></svg>
+  </div>
+
+  <!-- ═══ TOP CONTROLS ═══ -->
+  <div class="top-controls">
+    <button class="control-btn" id="soundToggle" aria-label="Toggle sound">
+      <svg id="iconMuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+      </svg>
+      <svg id="iconUnmuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+        <path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ═══ PROGRESS RAIL ═══ -->
+  <div class="progress-rail" id="progressRail"></div>
+
+  <!-- ═══ COUNTER ═══ -->
+  <div class="reel-counter" id="reelCounter"></div>
+
+  <!-- ═══ SCROLL HINT ═══ -->
+  <div class="scroll-hint" id="scrollHint">
+    <span class="scroll-hint-text">Scroll</span>
+    <svg class="scroll-hint-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+
+  <!-- ═══ REEL CONTAINER ═══ -->
+  <div class="reel-container" id="reelContainer"></div>
+
+  <script>
+    // ── Video Data ──────────────────────────────────
+    const VIDEOS = [
+      {
+        id: 'skills-v2',
+        title: 'Rasa 2026 Videos',
+        description: 'The new Skills system for building modular, reusable conversation components.',
+        src: 'assets/videos/Rasa-skills-v2-render.mp4',
+        category: 'videos',
+      },
+      // Add more videos here:
+      // {
+      //   id: 'unique-id',
+      //   title: 'Video Title',
+      //   description: 'Brief description.',
+      //   src: 'assets/videos/filename.mp4',
+      //   category: 'product',  // product | tutorial | webinar | announcement
+      // },
+    ];
+
+    // ── State ───────────────────────────────────────
+    let currentIndex = 0;
+    let isMuted = true;
+    let isPaused = false;
+    let scrollHintDismissed = false;
+
+    // ── Elements ────────────────────────────────────
+    const container = document.getElementById('reelContainer');
+    const rail = document.getElementById('progressRail');
+    const counter = document.getElementById('reelCounter');
+    const scrollHint = document.getElementById('scrollHint');
+    const soundToggle = document.getElementById('soundToggle');
+    const iconMuted = document.getElementById('iconMuted');
+    const iconUnmuted = document.getElementById('iconUnmuted');
+
+    // ── Build Reels ─────────────────────────────────
+    VIDEOS.forEach((video, i) => {
+      // Reel slide
+      const reel = document.createElement('div');
+      reel.className = 'reel';
+      reel.dataset.index = i;
+
+      reel.innerHTML = `
+        <video src="${video.src}" loop muted playsinline preload="metadata"></video>
+        <div class="reel-glow"></div>
+        <div class="reel-overlay-top"></div>
+        <div class="reel-overlay-bottom"></div>
+        <div class="reel-click-zone"></div>
+        <div class="pause-indicator">
+          <div class="pause-icon">
+            <svg viewBox="0 0 24 24" class="icon-pause"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            <svg viewBox="0 0 24 24" class="icon-play" style="display:none"><polygon points="6,3 20,12 6,21"/></svg>
+          </div>
+        </div>
+        <div class="reel-content">
+          <div class="reel-category">${video.category}</div>
+          <h2 class="reel-title">${video.title}</h2>
+          ${video.description ? `<p class="reel-desc">${video.description}</p>` : ''}
+        </div>
+        <div class="video-progress"><div class="video-progress-fill"></div></div>
+      `;
+
+      container.appendChild(reel);
+
+      // Progress dot
+      const dot = document.createElement('div');
+      dot.className = 'progress-dot';
+      dot.addEventListener('click', () => {
+        const target = container.querySelectorAll('.reel')[i];
+        target.scrollIntoView({ behavior: 'smooth' });
+      });
+      rail.appendChild(dot);
+    });
+
+    // ── Update UI ───────────────────────────────────
+    function updateCounter() {
+      counter.innerHTML = `<span class="current">${String(currentIndex + 1).padStart(2, '0')}</span> / ${String(VIDEOS.length).padStart(2, '0')}`;
+    }
+
+    function updateProgressDots() {
+      rail.querySelectorAll('.progress-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    // ── Intersection Observer ───────────────────────
+    const reels = container.querySelectorAll('.reel');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const reel = entry.target;
+        const video = reel.querySelector('video');
+        const idx = parseInt(reel.dataset.index);
+
+        if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+          reel.classList.add('active');
+          currentIndex = idx;
+          video.muted = isMuted;
+          if (!isPaused) {
+            video.play().catch(() => {});
+          }
+          updateCounter();
+          updateProgressDots();
+
+          if (!scrollHintDismissed && idx > 0) {
+            scrollHint.classList.add('hidden');
+            scrollHintDismissed = true;
+          }
+        } else {
+          reel.classList.remove('active');
+          video.pause();
+        }
+      });
+    }, {
+      root: container,
+      threshold: [0.6],
+    });
+
+    reels.forEach(reel => observer.observe(reel));
+
+    // ── Video Progress Bar ──────────────────────────
+    function updateProgressBars() {
+      reels.forEach(reel => {
+        const video = reel.querySelector('video');
+        const fill = reel.querySelector('.video-progress-fill');
+        if (video.duration && reel.classList.contains('active')) {
+          fill.style.width = (video.currentTime / video.duration * 100) + '%';
+        }
+      });
+      requestAnimationFrame(updateProgressBars);
+    }
+    requestAnimationFrame(updateProgressBars);
+
+    // ── Click to Pause/Play ─────────────────────────
+    container.addEventListener('click', (e) => {
+      if (e.target.closest('.control-btn')) return;
+      const reel = e.target.closest('.reel');
+      if (!reel || !reel.classList.contains('active')) return;
+
+      const video = reel.querySelector('video');
+      const indicator = reel.querySelector('.pause-indicator');
+      const iconPause = indicator.querySelector('.icon-pause');
+      const iconPlay = indicator.querySelector('.icon-play');
+
+      if (video.paused) {
+        video.play();
+        isPaused = false;
+        iconPause.style.display = 'block';
+        iconPlay.style.display = 'none';
+      } else {
+        video.pause();
+        isPaused = true;
+        iconPause.style.display = 'none';
+        iconPlay.style.display = 'block';
+      }
+
+      indicator.classList.add('visible');
+      clearTimeout(indicator._hideTimer);
+      indicator._hideTimer = setTimeout(() => {
+        indicator.classList.remove('visible');
+      }, 600);
+    });
+
+    // ── Sound Toggle ────────────────────────────────
+    soundToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isMuted = !isMuted;
+      iconMuted.style.display = isMuted ? 'block' : 'none';
+      iconUnmuted.style.display = isMuted ? 'none' : 'block';
+
+      reels.forEach(reel => {
+        reel.querySelector('video').muted = isMuted;
+      });
+    });
+
+    // ── Keyboard Navigation ─────────────────────────
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'j') {
+        e.preventDefault();
+        if (currentIndex < VIDEOS.length - 1) {
+          reels[currentIndex + 1].scrollIntoView({ behavior: 'smooth' });
+        }
+      } else if (e.key === 'ArrowUp' || e.key === 'k') {
+        e.preventDefault();
+        if (currentIndex > 0) {
+          reels[currentIndex - 1].scrollIntoView({ behavior: 'smooth' });
+        }
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        const activeReel = container.querySelector('.reel.active');
+        if (activeReel) activeReel.querySelector('.reel-click-zone').click();
+      } else if (e.key === 'm') {
+        soundToggle.click();
+      }
+    });
+
+    // ── Dismiss scroll hint on first scroll ─────────
+    container.addEventListener('scroll', () => {
+      if (!scrollHintDismissed && container.scrollTop > 50) {
+        scrollHint.classList.add('hidden');
+        scrollHintDismissed = true;
+      }
+    }, { passive: true });
+
+    // ── Init ────────────────────────────────────────
+    updateCounter();
+    updateProgressDots();
+
+    // Auto-play first reel
+    if (reels.length > 0) {
+      reels[0].classList.add('active');
+      const firstVideo = reels[0].querySelector('video');
+      firstVideo.play().catch(() => {});
+    }
+
+    // Hide scroll hint if only 1 video
+    if (VIDEOS.length <= 1) {
+      scrollHint.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
