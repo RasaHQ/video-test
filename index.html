@@ -506,6 +506,7 @@
       bottom: 0;
       left: 0;
       right: 0;
+      height: 50%;
       z-index: 2;
       transform: translateY(100%);
       transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -518,113 +519,48 @@
     }
 
     .end-card-inner {
-      background: linear-gradient(to top, rgba(8,3,39,0.97) 70%, rgba(8,3,39,0.85) 90%, transparent);
-      padding: 2.5rem 1.5rem 1.5rem;
+      height: 100%;
+      background: linear-gradient(to top, rgba(8,3,39,1) 65%, rgba(8,3,39,0.97) 85%, rgba(8,3,39,0.8));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 1.75rem 1.5rem 1.5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: space-evenly;
       gap: 0;
     }
 
     /* ── Vote Section ─────────────────────────── */
     .end-card-vote {
       text-align: center;
-      margin-bottom: 1rem;
       transition: opacity 0.3s ease;
     }
 
     .end-card-vote.hidden { display: none; }
 
     .end-card-vote-label {
-      font-family: var(--body);
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: #fff;
-      margin-bottom: 0.75rem;
+      font-family: var(--display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--aqua);
+      margin-bottom: 1rem;
     }
 
     .end-card-vote-options {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.5rem;
+      gap: 0.625rem;
     }
 
     .vote-option {
       font-family: var(--body);
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--text);
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .vote-option:hover {
-      background: rgba(90,23,238,0.25);
-      border-color: rgba(90,23,238,0.5);
-      color: #fff;
-    }
-
-    .vote-option.selected {
-      background: var(--purple);
-      border-color: var(--purple);
-      color: #fff;
-    }
-
-    /* ── Email Capture (after vote) ───────────── */
-    .end-card-email {
-      text-align: center;
-      margin-bottom: 1rem;
-      display: none;
-    }
-
-    .end-card-email.visible { display: block; }
-
-    .end-card-email-label {
-      font-family: var(--body);
       font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-dim);
-      margin-bottom: 0.75rem;
-    }
-
-    .end-card-email-form {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-      max-width: 360px;
-      margin: 0 auto;
-    }
-
-    .end-card-email-input {
-      flex: 1;
-      font-family: var(--body);
-      font-size: 0.875rem;
-      color: #fff;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 8px;
-      padding: 0.625rem 0.875rem;
-      outline: none;
-      transition: border-color 0.2s;
-      min-width: 0;
-    }
-
-    .end-card-email-input::placeholder { color: var(--text-muted); }
-    .end-card-email-input:focus { border-color: var(--lilac); }
-
-    .end-card-email-submit {
-      font-family: var(--body);
-      font-size: 0.8125rem;
       font-weight: 600;
       color: #fff;
-      background: var(--purple);
-      border: none;
+      background: rgba(113,239,243,0.08);
+      border: 1px solid rgba(113,239,243,0.25);
       border-radius: 8px;
       padding: 0.625rem 1.25rem;
       cursor: pointer;
@@ -632,8 +568,76 @@
       white-space: nowrap;
     }
 
+    .vote-option:hover {
+      background: rgba(113,239,243,0.18);
+      border-color: rgba(113,239,243,0.5);
+      color: #fff;
+    }
+
+    .vote-option.selected {
+      background: var(--aqua);
+      border-color: var(--aqua);
+      color: var(--bg);
+    }
+
+    /* ── Email Capture (after vote) ───────────── */
+    .end-card-email {
+      text-align: center;
+      display: none;
+    }
+
+    .end-card-email.visible { display: block; }
+
+    .end-card-email-label {
+      font-family: var(--body);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .end-card-email-form {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    .end-card-email-input {
+      flex: 1;
+      font-family: var(--body);
+      font-size: 0.9375rem;
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      min-width: 0;
+    }
+
+    .end-card-email-input::placeholder { color: var(--text-muted); }
+    .end-card-email-input:focus { border-color: var(--aqua); }
+
+    .end-card-email-submit {
+      font-family: var(--body);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--bg);
+      background: var(--aqua);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
     .end-card-email-submit:hover {
-      background: #6b2bf5;
+      background: #8cf4f7;
+      box-shadow: 0 4px 20px rgba(113,239,243,0.3);
     }
 
     .end-card-email-skip {
@@ -643,7 +647,7 @@
       background: none;
       border: none;
       cursor: pointer;
-      margin-top: 0.5rem;
+      margin-top: 0.625rem;
       transition: color 0.2s;
     }
 
@@ -652,17 +656,16 @@
     /* ── Thank You ────────────────────────────── */
     .end-card-thanks {
       text-align: center;
-      margin-bottom: 1rem;
       display: none;
     }
 
     .end-card-thanks.visible { display: block; }
 
     .end-card-thanks-msg {
-      font-family: var(--body);
-      font-size: 0.9375rem;
-      font-weight: 500;
-      color: var(--lilac);
+      font-family: var(--display);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--aqua);
     }
 
     /* ── Bottom row: question + up next ───────── */
@@ -670,10 +673,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 1.25rem;
+      gap: 1.5rem;
       width: 100%;
       padding-top: 0.75rem;
-      border-top: 1px solid rgba(255,255,255,0.06);
+      border-top: 1px solid rgba(255,255,255,0.1);
     }
 
     .end-card-cta {
@@ -681,9 +684,9 @@
       align-items: center;
       gap: 0.5rem;
       font-family: var(--body);
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--text-dim);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
       background: none;
       border: none;
       padding: 0;
@@ -694,12 +697,12 @@
     }
 
     .end-card-cta:hover {
-      color: var(--lilac);
+      color: #fff;
     }
 
     .end-card-cta svg {
-      width: 14px;
-      height: 14px;
+      width: 15px;
+      height: 15px;
       fill: none;
       stroke: currentColor;
       stroke-width: 2;
@@ -707,8 +710,8 @@
 
     .end-card-sep {
       width: 1px;
-      height: 1.5rem;
-      background: rgba(255,255,255,0.1);
+      height: 1.75rem;
+      background: rgba(255,255,255,0.18);
     }
 
     .end-card-next {
@@ -726,16 +729,17 @@
     }
 
     .end-card-next:hover .end-card-next-title {
-      color: var(--lilac);
+      color: #fff;
     }
 
     .end-card-next-thumb {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border-radius: 5px;
       overflow: hidden;
-      background: rgba(255,255,255,0.04);
+      background: rgba(255,255,255,0.06);
       flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
     .end-card-next-thumb video {
@@ -747,23 +751,23 @@
     .end-card-next-info {
       display: flex;
       flex-direction: column;
-      gap: 0.2rem;
+      gap: 0.25rem;
     }
 
     .end-card-next-label {
       font-family: var(--mono);
-      font-size: 0.5rem;
+      font-size: 0.5625rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--text-muted);
+      color: rgba(255,255,255,0.45);
       line-height: 1;
     }
 
     .end-card-next-title {
       font-family: var(--body);
-      font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--text-dim);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
       line-height: 1;
       transition: color 0.2s;
     }
@@ -790,11 +794,12 @@
       .lightbox-inner { width: 95vw; max-width: none; }
       .play-btn { width: 56px; height: 56px; }
       .play-btn svg { width: 20px; height: 20px; }
-      .end-card-inner { padding: 2rem 1rem 1.25rem; }
-      .end-card-row { flex-direction: column; gap: 0.75rem; }
+      .end-card-inner { padding: 1.5rem 1rem 1rem; }
+      .end-card-vote-label { font-size: 1.0625rem; }
+      .end-card-row { flex-direction: column; gap: 0.625rem; }
       .end-card-sep { display: none; }
       .end-card-email-form { flex-direction: column; }
-      .vote-option { font-size: 0.75rem; padding: 0.4rem 0.75rem; }
+      .vote-option { font-size: 0.8125rem; padding: 0.5rem 1rem; }
     }
   </style>
 </head>
@@ -928,12 +933,11 @@
 
           <!-- State 1: Vote -->
           <div class="end-card-vote" id="endCardVote">
-            <div class="end-card-vote-label">What should we cover next?</div>
+            <div class="end-card-vote-label">Vote for the next video in this series</div>
             <div class="end-card-vote-options" id="voteOptions">
-              <button class="vote-option" data-topic="Orchestration">Orchestration</button>
-              <button class="vote-option" data-topic="Guardrails">Guardrails</button>
+              <button class="vote-option" data-topic="Multi-agent orchestration">Multi-agent orchestration</button>
               <button class="vote-option" data-topic="Voice agents">Voice agents</button>
-              <button class="vote-option" data-topic="Enterprise deployment">Enterprise deployment</button>
+              <button class="vote-option" data-topic="Evaluation & analytics">Evaluation &amp; analytics</button>
             </div>
           </div>
 
