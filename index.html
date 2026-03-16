@@ -955,7 +955,6 @@
               <input type="email" class="end-card-email-input" id="endCardEmailInput" placeholder="your@email.com" autocomplete="email">
               <button class="end-card-email-submit" id="endCardEmailSubmit">Notify me</button>
             </div>
-            <button class="end-card-email-skip" id="endCardEmailSkip">skip</button>
           </div>
 
           <!-- State 3: Thank you -->
@@ -1070,6 +1069,7 @@
       endCardShown = false;
       endCard.classList.remove('visible');
       resetVoteState();
+      currentVoteId = null;
       lightboxVideo.src = video.src;
       lightbox.classList.add('open');
       lightboxVideo.play().catch(() => {});
@@ -1149,13 +1149,37 @@
       voteOptions.querySelectorAll('.vote-option').forEach(btn => btn.classList.remove('selected'));
     }
 
-    // Vote click
+    // Send vote to API
+    let currentVoteId = null;
+
+    function submitVote() {
+      const payload = { topic: selectedTopic, video: currentVideoId };
+      fetch('/api/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(r => r.json())
+        .then(data => { if (data.voteId) currentVoteId = data.voteId; })
+        .catch(() => {});
+    }
+
+    function submitEmail(email) {
+      if (!currentVoteId || !email) return;
+      fetch('/api/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: selectedTopic, voteId: currentVoteId, email }),
+      }).catch(() => {});
+    }
+
+    // Vote click — log immediately, then offer optional email
     voteOptions.addEventListener('click', (e) => {
       const btn = e.target.closest('.vote-option');
       if (!btn) return;
       selectedTopic = btn.dataset.topic;
       btn.classList.add('selected');
-      // Transition to email after a brief moment
+      submitVote();
       setTimeout(() => {
         endCardVote.classList.add('hidden');
         endCardEmail.classList.add('visible');
@@ -1163,22 +1187,11 @@
       }, 300);
     });
 
-    // Send vote to API
-    function submitVote(email) {
-      const payload = { topic: selectedTopic, video: currentVideoId };
-      if (email) payload.email = email;
-      fetch('/api/vote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }).catch(() => {}); // fire and forget
-    }
-
-    // Email submit
+    // Email submit — updates existing vote record
     endCardEmailSubmit.addEventListener('click', () => {
       const email = endCardEmailInput.value.trim();
       if (!email) return;
-      submitVote(email);
+      submitEmail(email);
       endCardEmail.classList.remove('visible');
       endCardThanksMsg.textContent = "Thanks — we'll let you know.";
       endCardThanks.classList.add('visible');
@@ -1187,14 +1200,6 @@
     // Enter key submits email
     endCardEmailInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') endCardEmailSubmit.click();
-    });
-
-    // Skip email
-    endCardEmailSkip.addEventListener('click', () => {
-      submitVote(null);
-      endCardEmail.classList.remove('visible');
-      endCardThanksMsg.textContent = "Vote counted — thanks!";
-      endCardThanks.classList.add('visible');
     });
 
     lightboxClose.addEventListener('click', closeLightbox);
