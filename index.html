@@ -636,10 +636,6 @@
       gap: 0;
     }
 
-    .end-card-dismiss {
-      display: none;
-    }
-
     /* ── Vote Section ─────────────────────────── */
     .end-card-vote {
       text-align: center;
@@ -911,54 +907,15 @@
         max-width: none;
         border-radius: 0;
         aspect-ratio: auto;
-        display: flex;
-        flex-direction: column;
       }
       .lightbox-inner video {
         width: 100%;
-        flex: 1;
-        min-height: 0;
+        height: 100%;
         object-fit: contain;
       }
 
-      /* Hide custom controls on mobile, use native */
-      .custom-controls { display: none !important; }
-
-      /* End card takes over full viewport on mobile */
-      .end-card {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 100%;
-        z-index: 1002;
-        border-radius: 0;
-      }
-
-      .end-card-inner {
-        height: 100%;
-        background: rgba(8,3,39,0.97);
-        padding: 3rem 1.5rem 2rem;
-      }
-
-      .end-card-dismiss {
-        display: flex;
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.15);
-        color: #fff;
-        font-size: 1.25rem;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 10;
-      }
+      /* End card fills bottom portion */
+      .end-card { height: 55%; }
       .end-card-inner { padding: 1.25rem 1.25rem 1rem; }
       .end-card-vote-label { font-size: 1rem; margin-bottom: 0.75rem; }
       .vote-option { font-size: 0.8125rem; padding: 0.5rem 1rem; }
@@ -1121,7 +1078,6 @@
 
       <div class="end-card" id="endCard">
         <div class="end-card-inner">
-          <button class="end-card-dismiss" id="endCardDismiss">&times;</button>
 
           <!-- State 1: Vote -->
           <div class="end-card-vote" id="endCardVote">
@@ -1174,9 +1130,6 @@
   </div>
 
   <script>
-    // ── Mobile detection ────────────────────────
-    const isMobile = window.matchMedia('(max-width: 640px)').matches;
-
     // ── Video Data ──────────────────────────────
     const VIDEOS = [
       {
@@ -1259,16 +1212,13 @@
       endCard.classList.remove('visible');
       resetVoteState();
       lightboxVideo.src = video.src;
-      if (isMobile) lightboxVideo.setAttribute('controls', '');
       lightbox.classList.add('open');
-      if (!isMobile) {
-        customControls.classList.remove('hidden');
-        ctrlScrubber.value = 0;
-        ctrlTime.textContent = '0:00';
-        updateMuteIcon();
-      }
+      customControls.classList.remove('hidden');
+      ctrlScrubber.value = 0;
+      ctrlTime.textContent = '0:00';
+      updateMuteIcon();
       lightboxVideo.play().catch(() => {});
-      if (!isMobile) updatePlayIcon();
+      updatePlayIcon();
 
       // Update URL
       const newPath = '/' + videoId;
@@ -1292,7 +1242,6 @@
       endCardShown = false;
       endCard.classList.remove('visible');
       lightboxVideo.pause();
-      lightboxVideo.removeAttribute('controls');
       lightboxVideo.src = '';
       currentVideoId = null;
 
@@ -1377,12 +1326,6 @@
         endCard.classList.remove('visible');
         customControls.classList.remove('hidden');
       }
-    });
-
-    // Dismiss end card (mobile fullscreen)
-    document.getElementById('endCardDismiss').addEventListener('click', () => {
-      endCard.classList.remove('visible');
-      if (!isMobile) customControls.classList.remove('hidden');
     });
 
     // Tap video to play/pause
