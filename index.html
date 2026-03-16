@@ -500,13 +500,118 @@
       stroke-width: 2;
     }
 
+    /* ── Custom Video Controls ────────────────── */
+    .custom-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.625rem 1rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+      transition: opacity 0.3s ease;
+    }
+
+    .custom-controls.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .custom-controls-play {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .custom-controls-play svg {
+      width: 18px;
+      height: 18px;
+      fill: #fff;
+    }
+
+    .custom-controls-scrubber {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .custom-controls-scrubber::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .custom-controls-scrubber::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .custom-controls-time {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      color: rgba(255,255,255,0.7);
+      flex-shrink: 0;
+      min-width: 3.25rem;
+      text-align: right;
+    }
+
+    .custom-controls-mute {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.8);
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      transition: color 0.2s;
+    }
+
+    .custom-controls-mute:hover { color: #fff; }
+
+    .custom-controls-mute svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
     /* ── End Card ──────────────────────────────── */
     .end-card {
       position: absolute;
-      bottom: 44px;
+      bottom: 0;
       left: 0;
       right: 0;
-      height: calc(50% - 44px);
+      height: 50%;
       z-index: 2;
       transform: translateY(100%);
       transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -809,8 +914,8 @@
         object-fit: contain;
       }
 
-      /* End card fills bottom portion, above controls */
-      .end-card { bottom: 48px; height: calc(55% - 48px); }
+      /* End card fills bottom portion */
+      .end-card { height: 55%; }
       .end-card-inner { padding: 1.25rem 1.25rem 1rem; }
       .end-card-vote-label { font-size: 1rem; margin-bottom: 0.75rem; }
       .vote-option { font-size: 0.8125rem; padding: 0.5rem 1rem; }
@@ -957,7 +1062,20 @@
       <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div class="lightbox-inner">
-      <video id="lightboxVideo" controls playsinline></video>
+      <video id="lightboxVideo" playsinline></video>
+
+      <!-- Custom controls -->
+      <div class="custom-controls" id="customControls">
+        <button class="custom-controls-play" id="ctrlPlay">
+          <svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>
+        </button>
+        <input type="range" class="custom-controls-scrubber" id="ctrlScrubber" min="0" max="1000" value="0">
+        <span class="custom-controls-time" id="ctrlTime">0:00</span>
+        <button class="custom-controls-mute" id="ctrlMute">
+          <svg viewBox="0 0 24 24" id="ctrlMuteIcon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        </button>
+      </div>
+
       <div class="end-card" id="endCard">
         <div class="end-card-inner">
 
@@ -1095,7 +1213,12 @@
       resetVoteState();
       lightboxVideo.src = video.src;
       lightbox.classList.add('open');
+      customControls.classList.remove('hidden');
+      ctrlScrubber.value = 0;
+      ctrlTime.textContent = '0:00';
+      updateMuteIcon();
       lightboxVideo.play().catch(() => {});
+      updatePlayIcon();
 
       // Update URL
       const newPath = '/' + videoId;
@@ -1127,13 +1250,71 @@
       }
     }
 
-    // End card 5s before video ends
+    // ── Custom Controls ────────────────────────
+    const customControls = document.getElementById('customControls');
+    const ctrlPlay = document.getElementById('ctrlPlay');
+    const ctrlScrubber = document.getElementById('ctrlScrubber');
+    const ctrlTime = document.getElementById('ctrlTime');
+    const ctrlMute = document.getElementById('ctrlMute');
+    const ctrlMuteIcon = document.getElementById('ctrlMuteIcon');
+
+    const iconPlay = '<polygon points="6,3 20,12 6,21"/>';
+    const iconPause = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    const iconMuted = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>';
+    const iconUnmuted = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/>';
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60);
+      return m + ':' + String(sec).padStart(2, '0');
+    }
+
+    function updatePlayIcon() {
+      ctrlPlay.innerHTML = '<svg viewBox="0 0 24 24">' + (lightboxVideo.paused ? iconPlay : iconPause) + '</svg>';
+    }
+
+    function updateMuteIcon() {
+      ctrlMuteIcon.innerHTML = lightboxVideo.muted ? iconMuted : iconUnmuted;
+    }
+
+    ctrlPlay.addEventListener('click', () => {
+      if (lightboxVideo.paused) lightboxVideo.play().catch(() => {});
+      else lightboxVideo.pause();
+    });
+
+    lightboxVideo.addEventListener('play', updatePlayIcon);
+    lightboxVideo.addEventListener('pause', updatePlayIcon);
+
+    ctrlMute.addEventListener('click', () => {
+      lightboxVideo.muted = !lightboxVideo.muted;
+      updateMuteIcon();
+    });
+
+    let scrubbing = false;
+    ctrlScrubber.addEventListener('input', () => {
+      scrubbing = true;
+      if (lightboxVideo.duration) {
+        lightboxVideo.currentTime = (ctrlScrubber.value / 1000) * lightboxVideo.duration;
+      }
+    });
+    ctrlScrubber.addEventListener('change', () => { scrubbing = false; });
+
+    // End card 5s before video ends + update scrubber
     lightboxVideo.addEventListener('timeupdate', () => {
       if (!lightboxVideo.duration) return;
       const remaining = lightboxVideo.duration - lightboxVideo.currentTime;
+
+      // Update scrubber position
+      if (!scrubbing) {
+        ctrlScrubber.value = (lightboxVideo.currentTime / lightboxVideo.duration) * 1000;
+      }
+      ctrlTime.textContent = formatTime(lightboxVideo.currentTime);
+
+      // Show end card 5s before end, hide controls
       if (remaining <= 5 && !endCardShown) {
         endCardShown = true;
         endCard.classList.add('visible');
+        customControls.classList.add('hidden');
       }
     });
 
@@ -1143,7 +1324,14 @@
       if (remaining > 5) {
         endCardShown = false;
         endCard.classList.remove('visible');
+        customControls.classList.remove('hidden');
       }
+    });
+
+    // Tap video to play/pause
+    lightboxVideo.addEventListener('click', () => {
+      if (lightboxVideo.paused) lightboxVideo.play().catch(() => {});
+      else lightboxVideo.pause();
     });
 
     endCardNext.addEventListener('click', () => {
