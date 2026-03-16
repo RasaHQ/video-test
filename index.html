@@ -506,7 +506,6 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 33.333%;
       z-index: 2;
       transform: translateY(100%);
       transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -519,44 +518,188 @@
     }
 
     .end-card-inner {
-      height: 100%;
-      background: linear-gradient(to top, rgba(8,3,39,0.95) 60%, rgba(8,3,39,0.7));
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: linear-gradient(to top, rgba(8,3,39,0.97) 70%, rgba(8,3,39,0.85) 90%, transparent);
+      padding: 2.5rem 1.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── Vote Section ─────────────────────────── */
+    .end-card-vote {
+      text-align: center;
+      margin-bottom: 1rem;
+      transition: opacity 0.3s ease;
+    }
+
+    .end-card-vote.hidden { display: none; }
+
+    .end-card-vote-label {
+      font-family: var(--body);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .end-card-vote-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .vote-option {
+      font-family: var(--body);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .vote-option:hover {
+      background: rgba(90,23,238,0.25);
+      border-color: rgba(90,23,238,0.5);
+      color: #fff;
+    }
+
+    .vote-option.selected {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: #fff;
+    }
+
+    /* ── Email Capture (after vote) ───────────── */
+    .end-card-email {
+      text-align: center;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .end-card-email.visible { display: block; }
+
+    .end-card-email-label {
+      font-family: var(--body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      margin-bottom: 0.75rem;
+    }
+
+    .end-card-email-form {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .end-card-email-input {
+      flex: 1;
+      font-family: var(--body);
+      font-size: 0.875rem;
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 0.625rem 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+      min-width: 0;
+    }
+
+    .end-card-email-input::placeholder { color: var(--text-muted); }
+    .end-card-email-input:focus { border-color: var(--lilac); }
+
+    .end-card-email-submit {
+      font-family: var(--body);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--purple);
+      border: none;
+      border-radius: 8px;
+      padding: 0.625rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .end-card-email-submit:hover {
+      background: #6b2bf5;
+    }
+
+    .end-card-email-skip {
+      font-family: var(--body);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: color 0.2s;
+    }
+
+    .end-card-email-skip:hover { color: var(--text-dim); }
+
+    /* ── Thank You ────────────────────────────── */
+    .end-card-thanks {
+      text-align: center;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .end-card-thanks.visible { display: block; }
+
+    .end-card-thanks-msg {
+      font-family: var(--body);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--lilac);
+    }
+
+    /* ── Bottom row: question + up next ───────── */
+    .end-card-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 2rem;
-      padding: 0 2rem;
+      gap: 1.25rem;
+      width: 100%;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
     }
 
     .end-card-cta {
       display: inline-flex;
       align-items: center;
-      gap: 0.625rem;
+      gap: 0.5rem;
       font-family: var(--body);
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: #fff;
-      background: var(--purple);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      background: none;
       border: none;
-      border-radius: 10px;
-      padding: 0.75rem 1.5rem;
+      padding: 0;
       cursor: pointer;
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: color 0.2s ease;
       white-space: nowrap;
     }
 
     .end-card-cta:hover {
-      background: #6b2bf5;
-      box-shadow: 0 4px 24px var(--purple-glow);
-      transform: translateY(-1px);
+      color: var(--lilac);
     }
 
     .end-card-cta svg {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       fill: none;
       stroke: currentColor;
       stroke-width: 2;
@@ -564,33 +707,32 @@
 
     .end-card-sep {
       width: 1px;
-      height: 2.5rem;
-      background: rgba(255,255,255,0.12);
+      height: 1.5rem;
+      background: rgba(255,255,255,0.1);
     }
 
     .end-card-next {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 10px;
-      padding: 0.5rem 1rem 0.5rem 0.5rem;
+      gap: 0.625rem;
+      background: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
       cursor: pointer;
       transition: all 0.2s ease;
       text-decoration: none;
       color: inherit;
     }
 
-    .end-card-next:hover {
-      background: rgba(255,255,255,0.12);
-      border-color: rgba(255,255,255,0.22);
+    .end-card-next:hover .end-card-next-title {
+      color: var(--lilac);
     }
 
     .end-card-next-thumb {
-      width: 48px;
-      height: 48px;
-      border-radius: 6px;
+      width: 36px;
+      height: 36px;
+      border-radius: 5px;
       overflow: hidden;
       background: rgba(255,255,255,0.04);
       flex-shrink: 0;
@@ -605,12 +747,12 @@
     .end-card-next-info {
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
+      gap: 0.2rem;
     }
 
     .end-card-next-label {
       font-family: var(--mono);
-      font-size: 0.5625rem;
+      font-size: 0.5rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--text-muted);
@@ -619,10 +761,11 @@
 
     .end-card-next-title {
       font-family: var(--body);
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
       font-weight: 500;
-      color: var(--text);
+      color: var(--text-dim);
       line-height: 1;
+      transition: color 0.2s;
     }
 
     /* ── Scroll Fade-in ───────────────────────── */
@@ -647,12 +790,11 @@
       .lightbox-inner { width: 95vw; max-width: none; }
       .play-btn { width: 56px; height: 56px; }
       .play-btn svg { width: 20px; height: 20px; }
-      .end-card-inner {
-        flex-direction: column;
-        gap: 0.75rem;
-        padding: 0 1.25rem;
-      }
+      .end-card-inner { padding: 2rem 1rem 1.25rem; }
+      .end-card-row { flex-direction: column; gap: 0.75rem; }
       .end-card-sep { display: none; }
+      .end-card-email-form { flex-direction: column; }
+      .vote-option { font-size: 0.75rem; padding: 0.4rem 0.75rem; }
     }
   </style>
 </head>
@@ -783,22 +925,53 @@
       <video id="lightboxVideo" controls playsinline></video>
       <div class="end-card" id="endCard">
         <div class="end-card-inner">
-          <a id="endCardCta"
-             href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ2SuCZYTOj30T4IEy_-q0yH2JeO6Z-FyVVTOXUPExWvNVp1zivZrHbdtxaIhpQyhInU3FQn0slr"
-             class="end-card-cta" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Have a question? Talk to Alan
-          </a>
-          <div class="end-card-sep"></div>
-          <div class="end-card-next" id="endCardNext">
-            <div class="end-card-next-thumb">
-              <video id="endCardNextThumb" muted playsinline preload="metadata"></video>
-            </div>
-            <div class="end-card-next-info">
-              <div class="end-card-next-label">Up next</div>
-              <div class="end-card-next-title" id="endCardNextTitle"></div>
+
+          <!-- State 1: Vote -->
+          <div class="end-card-vote" id="endCardVote">
+            <div class="end-card-vote-label">What should we cover next?</div>
+            <div class="end-card-vote-options" id="voteOptions">
+              <button class="vote-option" data-topic="Orchestration">Orchestration</button>
+              <button class="vote-option" data-topic="Guardrails">Guardrails</button>
+              <button class="vote-option" data-topic="Voice agents">Voice agents</button>
+              <button class="vote-option" data-topic="Enterprise deployment">Enterprise deployment</button>
             </div>
           </div>
+
+          <!-- State 2: Email capture -->
+          <div class="end-card-email" id="endCardEmail">
+            <div class="end-card-email-label">Nice pick. Want us to let you know when it's ready?</div>
+            <div class="end-card-email-form">
+              <input type="email" class="end-card-email-input" id="endCardEmailInput" placeholder="your@email.com" autocomplete="email">
+              <button class="end-card-email-submit" id="endCardEmailSubmit">Notify me</button>
+            </div>
+            <button class="end-card-email-skip" id="endCardEmailSkip">skip</button>
+          </div>
+
+          <!-- State 3: Thank you -->
+          <div class="end-card-thanks" id="endCardThanks">
+            <div class="end-card-thanks-msg" id="endCardThanksMsg">Thanks — we'll let you know.</div>
+          </div>
+
+          <!-- Always visible: question + up next -->
+          <div class="end-card-row">
+            <a id="endCardCta"
+               href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ2SuCZYTOj30T4IEy_-q0yH2JeO6Z-FyVVTOXUPExWvNVp1zivZrHbdtxaIhpQyhInU3FQn0slr"
+               class="end-card-cta" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Have a question? Talk to Alan
+            </a>
+            <div class="end-card-sep"></div>
+            <div class="end-card-next" id="endCardNext">
+              <div class="end-card-next-thumb">
+                <video id="endCardNextThumb" muted playsinline preload="metadata"></video>
+              </div>
+              <div class="end-card-next-info">
+                <div class="end-card-next-label">Up next</div>
+                <div class="end-card-next-title" id="endCardNextTitle"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -885,6 +1058,7 @@
       currentVideoId = videoId;
       endCardShown = false;
       endCard.classList.remove('visible');
+      resetVoteState();
       lightboxVideo.src = video.src;
       lightbox.classList.add('open');
       lightboxVideo.play().catch(() => {});
@@ -941,6 +1115,75 @@
     endCardNext.addEventListener('click', () => {
       const next = getNextPlayableVideo(currentVideoId);
       if (next) openLightbox(next.id);
+    });
+
+    // ── Vote → Email → Thanks flow ─────────────
+    const endCardVote = document.getElementById('endCardVote');
+    const endCardEmail = document.getElementById('endCardEmail');
+    const endCardThanks = document.getElementById('endCardThanks');
+    const endCardThanksMsg = document.getElementById('endCardThanksMsg');
+    const endCardEmailInput = document.getElementById('endCardEmailInput');
+    const endCardEmailSubmit = document.getElementById('endCardEmailSubmit');
+    const endCardEmailSkip = document.getElementById('endCardEmailSkip');
+    const voteOptions = document.getElementById('voteOptions');
+
+    let selectedTopic = null;
+
+    function resetVoteState() {
+      selectedTopic = null;
+      endCardVote.classList.remove('hidden');
+      endCardEmail.classList.remove('visible');
+      endCardThanks.classList.remove('visible');
+      endCardEmailInput.value = '';
+      voteOptions.querySelectorAll('.vote-option').forEach(btn => btn.classList.remove('selected'));
+    }
+
+    // Vote click
+    voteOptions.addEventListener('click', (e) => {
+      const btn = e.target.closest('.vote-option');
+      if (!btn) return;
+      selectedTopic = btn.dataset.topic;
+      btn.classList.add('selected');
+      // Transition to email after a brief moment
+      setTimeout(() => {
+        endCardVote.classList.add('hidden');
+        endCardEmail.classList.add('visible');
+        endCardEmailInput.focus();
+      }, 300);
+    });
+
+    // Send vote to API
+    function submitVote(email) {
+      const payload = { topic: selectedTopic, video: currentVideoId };
+      if (email) payload.email = email;
+      fetch('/api/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch(() => {}); // fire and forget
+    }
+
+    // Email submit
+    endCardEmailSubmit.addEventListener('click', () => {
+      const email = endCardEmailInput.value.trim();
+      if (!email) return;
+      submitVote(email);
+      endCardEmail.classList.remove('visible');
+      endCardThanksMsg.textContent = "Thanks — we'll let you know.";
+      endCardThanks.classList.add('visible');
+    });
+
+    // Enter key submits email
+    endCardEmailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') endCardEmailSubmit.click();
+    });
+
+    // Skip email
+    endCardEmailSkip.addEventListener('click', () => {
+      submitVote(null);
+      endCardEmail.classList.remove('visible');
+      endCardThanksMsg.textContent = "Vote counted — thanks!";
+      endCardThanks.classList.add('visible');
     });
 
     lightboxClose.addEventListener('click', closeLightbox);
