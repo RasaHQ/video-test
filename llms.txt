@@ -1,0 +1,114 @@
+# 2026.rasa.com — Video Series
+
+> The elements of a modern agent architecture, explained in 1 minute each.
+
+This site accompanies a video series by Alan Nichol, co-founder and CTO of Rasa, on the building blocks of production AI agents. Each video is roughly 75 seconds and covers a single architectural concept.
+
+Rasa is the developer platform for AI agents that actually work in production. Learn more at https://rasa.com
+
+---
+
+## Multitasking
+
+URL: https://2026.rasa.com/multitasking
+Duration: 1:16
+
+An AI agent handles an insurance claim while simultaneously managing three parallel tasks: processing damage photos, arranging a courtesy car, and answering policy questions — all in a single conversation.
+
+### Transcript
+
+Customer: Hey, someone hit my car while I was parked.
+
+Agent: I'm sorry to hear that. Let me pull up your account. What's your policy number?
+
+Customer: 73-47-21-06.
+
+Agent: Got it. I've got your policy here. I'm going to need some photos of the damage. I'll send a link to your phone.
+
+Customer: Okay.
+
+Customer: Do I get a courtesy car?
+
+Agent: You are covered for one. Shall I arrange that?
+
+Customer: Please do.
+
+Agent: I'll take care of it. You'll find the pick up details in the app.
+
+Customer: And what's my deductible on this?
+
+Agent: For this type of claim, your deductible's $200.
+
+System: Assessment complete — est. 1 week repair.
+
+Agent: Also, your photos just came back and it's estimating one week for a fix. I'll book that in for you.
+
+Customer: Oh, already? Wow, thanks so much.
+
+---
+
+## Memory
+
+URL: https://2026.rasa.com/memory
+Duration: 1:24
+
+The shift from slots to a real memory layer is as big as going from intents to LLMs. This video shows how Rasa agents build memory on their own — shared across every skill, channel, and conversation — without being told what to look for.
+
+### Transcript
+
+Alan: Hi, I'm Alan, co-founder of Rasa. We've been building something that I think of as emergent personalization — agents that get to know your customers on their own.
+
+Alan: The shift we're making from slots to a real memory layer is as big as going from intents to using LLMs.
+
+Alan: Ever since I built the first version of Rasa, memory meant a list of variables that you defined up front — rigid, narrow — and you only got back exactly what you put in.
+
+Alan: We build something different. Memory your agent builds on its own. Shared across every skill it has. It learns what matters. Across skills, channels, and conversations — without you having to tell it what to look for.
+
+Narration: Over the course of a month, Sarah contacts her carrier for a few different reasons. Each time, the agent picks up on something new. It notices what matters and takes notes. No single conversation told the agent what to do, but based on its memory, it proactively suggested a better plan for Sarah's family.
+
+Alan: And it works everywhere Sarah shows up — chatting, calling, using the app. It's an ongoing conversation with an agent that remembers her.
+
+Not a database. A memory.
+
+---
+
+## Skills
+
+URL: https://2026.rasa.com/skills
+Duration: 1:18
+
+Too many agent architectures rely on prompt and pray. Rasa skills sit on a spectrum from fully controlled to fully autonomous. Build once, compose freely, test in isolation.
+
+### Transcript
+
+Alan: Too many agent architectures rely on prompt and pray.
+
+Alan: Let me show you how skills work in Rasa.
+
+Alan: A skill is one thing your agent can do. What makes Rasa different is that each skill sits on a spectrum from fully controlled to fully autonomous.
+
+Alan: Here's what that looks like. This appointment booking skill is fully autonomous. The LLM uses an MCP server to handle the whole conversation.
+
+Alan: But say you want to make sure your agent never skips a confirmation step. You add a bit of structure and now you have a hybrid skill. Autonomous conversation, control where you need it.
+
+Alan: Because each skill is self-contained, you can take this and drop it into any agent that you're working on. Build once, compose freely, and test in isolation.
+
+Alan: Each skill is independent. Rasa orchestrates them into an agent.
+
+---
+
+## Coming Soon
+
+- Multi-agent orchestration
+- Voice agents
+- Evaluation & analytics
+
+Vote for the next topic at the end of any video on 2026.rasa.com.
+
+---
+
+## Contact
+
+Alan Nichol — Co-founder & CTO, Rasa
+LinkedIn: https://www.linkedin.com/in/anichol/
+Book a call: https://calendar.google.com/calendar/appointments/schedules/AcZssZ2SuCZYTOj30T4IEy_-q0yH2JeO6Z-FyVVTOXUPExWvNVp1zivZrHbdtxaIhpQyhInU3FQn0slr
