@@ -14,6 +14,11 @@ const OG_DATA = {
     description: 'Rasa skills sit on a spectrum from fully controlled to fully autonomous. Build once, compose freely, test in isolation. See how it works in 75 seconds.',
     image: '/assets/thumbnails/skills.png',
   },
+  '/self-improving': {
+    title: 'Self-Improving Agents — Are you in control, or trusting a black box?',
+    description: 'Every conversation is signal. Rasa gives your coding agent the context to diagnose failures, write fixes, and test them — before users ever see it. Your automation compounds.',
+    image: '/assets/thumbnails/self-improving-square.png',
+  },
 };
 
 export default function middleware(request) {
@@ -54,5 +59,5 @@ export default function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/multitasking', '/memory', '/skills'],
+  matcher: ['/multitasking', '/memory', '/skills', '/self-improving'],
 };
