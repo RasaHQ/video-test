@@ -10,7 +10,7 @@ const OG_DATA = {
     image: '/assets/thumbnails/memory.png',
   },
   '/skills': {
-    title: 'Skills — Too many agent architectures rely on prompt and pray.',
+    title: 'Skills — A spectrum from fully controlled to fully autonomous.',
     description: 'Rasa skills sit on a spectrum from fully controlled to fully autonomous. Build once, compose freely, test in isolation. See how it works in 75 seconds.',
     image: '/assets/thumbnails/skills.png',
   },

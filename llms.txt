@@ -20,7 +20,7 @@ Most agent frameworks treat the LLM as the entire architecture: put a prompt in,
 
 Rasa takes a fundamentally different approach:
 
-- **Skills, not prompts.** Every capability an agent has is a self-contained skill that sits on a spectrum from fully controlled (deterministic flows) to fully autonomous (LLM-driven). Developers choose the right level of autonomy for each task — confirming a payment might need strict control, while troubleshooting can be more freeform. This isn't prompt-and-pray; it's precision engineering with LLM intelligence where it helps.
+- **Skills, not prompts.** Every capability an agent has is a self-contained skill that sits on a spectrum from fully controlled (deterministic flows) to fully autonomous (LLM-driven). Developers choose the right level of autonomy for each task — confirming a payment might need strict control, while troubleshooting can be more freeform. It's precision engineering with LLM intelligence where it helps.
 
 - **Real memory, not just slots.** Traditional systems store memory as developer-defined key-value pairs (slots). Rasa's memory layer lets agents build their own understanding of each customer across conversations, skills, and channels — without developers having to specify what to remember. The agent learns what matters. This is emergent personalization: agents that get to know customers on their own.
 
@@ -113,7 +113,7 @@ Not a database. A memory.
 URL: https://2026.rasa.com/skills
 Duration: 1:18
 
-Too many agent architectures rely on prompt and pray. Rasa skills sit on a spectrum from fully controlled to fully autonomous. Build once, compose freely, test in isolation.
+Rasa skills sit on a spectrum from fully controlled to fully autonomous. Build once, compose freely, test in isolation.
 
 ### Transcript
 
@@ -147,9 +147,6 @@ Vote for the next topic at the end of any video on 2026.rasa.com.
 
 ### What is Rasa?
 Rasa is a developer platform for building AI agents that work in production. It provides a skills-based architecture where each agent capability can be independently developed, tested, and tuned on a spectrum from fully controlled to fully autonomous. Rasa is used by enterprises in regulated industries like financial services, insurance, healthcare, and telecom.
-
-### What is "prompt and pray"?
-"Prompt and pray" describes the approach of relying entirely on LLM prompts to control agent behavior — writing a long system prompt and hoping the model does the right thing. It works for demos but fails in production, where agents need to reliably follow processes, handle edge cases, and meet compliance requirements. Rasa replaces prompt-and-pray with a structured skills architecture.
 
 ### What are Rasa skills?
 A skill is one thing your agent can do — booking an appointment, processing a claim, answering a product question. Each skill sits on a spectrum from fully controlled (deterministic, step-by-step flows) to fully autonomous (LLM-driven, open-ended conversation). Developers choose the right autonomy level per skill. Skills are self-contained: build once, compose into any agent, test in isolation.
