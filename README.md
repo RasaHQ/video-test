@@ -1,22 +1,36 @@
-# CODING AGENTS: READ THIS FIRST
+# 2026.rasa.com
 
-This is a **handoff bundle** from Claude Design (claude.ai/design).
+Landing page for Rasa's video series on the architecture of production AI agents.
 
-A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
+Deployed on Vercel at [2026.rasa.com](https://2026.rasa.com).
 
-## What you should do — IMPORTANT
+## Structure
 
-**Find the primary design file under `new-2026-rasa-com-site-design/project/` and read it top to bottom.** Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
+- `index.html` — the site (single page, vanilla HTML/CSS/JS)
+- `cymatics.js` — canvas animation engine for the hero + motif tiles
+- `assets/` — fonts, thumbnails, videos, brand SVGs
+- `api/vote.js` — Vercel function that records video votes + follow-up emails in Vercel KV
+- `middleware.js` — injects per-video Open Graph tags for `/multitasking`, `/memory`, `/skills`, `/self-improving`
+- `vercel.json` — rewrites the per-video URLs to `/index.html` so deep links resolve
+- `llms.txt` — LLM-readable description of the series
 
-**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
+## Video routes
 
-## About the design files
+Each video has a deep-linkable URL that opens the lightbox on page load:
 
-The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
+- `/multitasking`
+- `/memory`
+- `/skills`
+- `/self-improving`
 
-**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
+## Local preview
 
-## Bundle contents
+It's a static site — open `index.html` in a browser, or run any static server from the repo root. The vote API and OG injection only work on Vercel.
 
-- `new-2026-rasa-com-site-design/README.md` — this file
-- `new-2026-rasa-com-site-design/project/` — the `New 2026.rasa.com site design` project files (HTML prototypes, assets, components)
+## Reading votes
+
+```
+GET /api/vote?secret=$ADMIN_SECRET&limit=100
+```
+
+Returns per-topic counts plus the most recent votes (with emails merged in).
