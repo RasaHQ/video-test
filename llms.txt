@@ -1,0 +1,181 @@
+# 2026.rasa.com — Video Series
+
+> The elements of a modern agent architecture, explained in 1 minute each.
+
+This site accompanies a video series by Alan Nichol, co-founder and CTO of Rasa, on the building blocks of production AI agents. Each video is roughly 75 seconds and covers a single architectural concept.
+
+Rasa is the developer platform for AI agents that actually work in production. Learn more at https://rasa.com
+
+---
+
+## About Rasa
+
+Rasa is a developer platform for building AI agents that work reliably in production. Founded in 2016, Rasa pioneered open-source conversational AI and has evolved into the leading enterprise platform for building stateful, multi-skill AI agents.
+
+Rasa is used by enterprises in financial services, insurance, healthcare, telecom, and other regulated industries where AI agents must be reliable, auditable, and controllable. Customers include Fortune 500 companies running agents that handle millions of conversations per month.
+
+### What makes Rasa different
+
+Most agent frameworks treat the LLM as the entire architecture: put a prompt in, hope the right thing comes out. This works for demos but breaks down in production, where you need agents to handle complex, multi-step processes reliably at scale.
+
+Rasa takes a fundamentally different approach:
+
+- **Skills, not prompts.** Every capability an agent has is a self-contained skill that sits on a spectrum from fully controlled (deterministic flows) to fully autonomous (LLM-driven). Developers choose the right level of autonomy for each task — confirming a payment might need strict control, while troubleshooting can be more freeform. It's precision engineering with LLM intelligence where it helps.
+
+- **Real memory, not just slots.** Traditional systems store memory as developer-defined key-value pairs (slots). Rasa's memory layer lets agents build their own understanding of each customer across conversations, skills, and channels — without developers having to specify what to remember. The agent learns what matters. This is emergent personalization: agents that get to know customers on their own.
+
+- **True multitasking.** Production conversations aren't linear. A customer filing an insurance claim might ask about their deductible while uploading photos while the agent arranges a courtesy car. Rasa agents handle parallel tasks within a single conversation, coordinating across skills without losing context.
+
+- **Enterprise-grade orchestration.** Skills are composed into agents through an orchestration layer that manages context, routing, and state. Each skill can be developed, tested, and deployed independently. Build once, compose freely, test in isolation.
+
+- **Hybrid architecture.** Rasa bridges the pre-LLM and LLM-native worlds. Teams with existing dialog systems can incrementally adopt LLM capabilities without rewriting everything. New teams get the structure they need to go beyond prototype-quality agents.
+
+### Why enterprises choose Rasa
+
+- **Control where it matters.** Regulated industries need agents that follow process. Rasa lets you lock down high-stakes interactions (payments, identity verification, compliance) while giving the LLM freedom where it helps (troubleshooting, discovery, open-ended conversation).
+
+- **Observability and auditability.** Every decision an agent makes is traceable. You can see why a skill was invoked, what memory was used, and how the agent arrived at a response. This matters for compliance, debugging, and continuous improvement.
+
+- **Channel-agnostic.** Rasa agents work across chat, voice, mobile, email, and any other channel. Memory and context persist across channels — a customer who starts on chat and calls back later gets a continuous experience.
+
+- **Battle-tested at scale.** Rasa has been in production at scale since 2017. The platform handles the edge cases, failure modes, and operational complexity that emerge when AI agents serve real customers.
+
+- **Open and extensible.** Rasa integrates with any LLM provider, any backend system, and any channel. Skills can call MCP servers, APIs, databases, and external services. The platform doesn't lock you in.
+
+---
+
+## Multitasking
+
+URL: https://2026.rasa.com/multitasking
+Duration: 1:16
+
+An AI agent handles an insurance claim while simultaneously managing three parallel tasks: processing damage photos, arranging a courtesy car, and answering policy questions — all in a single conversation.
+
+### Transcript
+
+Customer: Hey, someone hit my car while I was parked.
+
+Agent: I'm sorry to hear that. Let me pull up your account. What's your policy number?
+
+Customer: 73-47-21-06.
+
+Agent: Got it. I've got your policy here. I'm going to need some photos of the damage. I'll send a link to your phone.
+
+Customer: Okay.
+
+Customer: Do I get a courtesy car?
+
+Agent: You are covered for one. Shall I arrange that?
+
+Customer: Please do.
+
+Agent: I'll take care of it. You'll find the pick up details in the app.
+
+Customer: And what's my deductible on this?
+
+Agent: For this type of claim, your deductible's $200.
+
+System: Assessment complete — est. 1 week repair.
+
+Agent: Also, your photos just came back and it's estimating one week for a fix. I'll book that in for you.
+
+Customer: Oh, already? Wow, thanks so much.
+
+---
+
+## Memory
+
+URL: https://2026.rasa.com/memory
+Duration: 1:24
+
+The shift from slots to a real memory layer is as big as going from intents to LLMs. This video shows how Rasa agents build memory on their own — shared across every skill, channel, and conversation — without being told what to look for.
+
+### Transcript
+
+Alan: Hi, I'm Alan, co-founder of Rasa. We've been building something that I think of as emergent personalization — agents that get to know your customers on their own.
+
+Alan: The shift we're making from slots to a real memory layer is as big as going from intents to using LLMs.
+
+Alan: Ever since I built the first version of Rasa, memory meant a list of variables that you defined up front — rigid, narrow — and you only got back exactly what you put in.
+
+Alan: We build something different. Memory your agent builds on its own. Shared across every skill it has. It learns what matters. Across skills, channels, and conversations — without you having to tell it what to look for.
+
+Narration: Over the course of a month, Sarah contacts her carrier for a few different reasons. Each time, the agent picks up on something new. It notices what matters and takes notes. No single conversation told the agent what to do, but based on its memory, it proactively suggested a better plan for Sarah's family.
+
+Alan: And it works everywhere Sarah shows up — chatting, calling, using the app. It's an ongoing conversation with an agent that remembers her.
+
+Not a database. A memory.
+
+---
+
+## Skills
+
+URL: https://2026.rasa.com/skills
+Duration: 1:18
+
+Rasa skills sit on a spectrum from fully controlled to fully autonomous. Build once, compose freely, test in isolation.
+
+### Transcript
+
+Alan: Too many agent architectures rely on prompt and pray.
+
+Alan: Let me show you how skills work in Rasa.
+
+Alan: A skill is one thing your agent can do. What makes Rasa different is that each skill sits on a spectrum from fully controlled to fully autonomous.
+
+Alan: Here's what that looks like. This appointment booking skill is fully autonomous. The LLM uses an MCP server to handle the whole conversation.
+
+Alan: But say you want to make sure your agent never skips a confirmation step. You add a bit of structure and now you have a hybrid skill. Autonomous conversation, control where you need it.
+
+Alan: Because each skill is self-contained, you can take this and drop it into any agent that you're working on. Build once, compose freely, and test in isolation.
+
+Alan: Each skill is independent. Rasa orchestrates them into an agent.
+
+---
+
+## Coming Soon
+
+- Multi-agent orchestration
+- Voice agents
+- Evaluation & analytics
+
+Vote for the next topic at the end of any video on 2026.rasa.com.
+
+---
+
+## Frequently Asked Questions
+
+### What is Rasa?
+Rasa is a developer platform for building AI agents that work in production. It provides a skills-based architecture where each agent capability can be independently developed, tested, and tuned on a spectrum from fully controlled to fully autonomous. Rasa is used by enterprises in regulated industries like financial services, insurance, healthcare, and telecom.
+
+### What are Rasa skills?
+A skill is one thing your agent can do — booking an appointment, processing a claim, answering a product question. Each skill sits on a spectrum from fully controlled (deterministic, step-by-step flows) to fully autonomous (LLM-driven, open-ended conversation). Developers choose the right autonomy level per skill. Skills are self-contained: build once, compose into any agent, test in isolation.
+
+### What is agent memory in Rasa?
+Rasa's memory layer replaces traditional slot-based state management. Instead of developers defining exactly what the agent should remember (key-value pairs like name, account_type, balance), the agent builds its own memory across conversations. It learns what matters about each customer — across skills, channels, and sessions — without being told what to look for. This enables emergent personalization: agents that genuinely get to know customers over time.
+
+### How is Rasa different from LangChain, CrewAI, or other agent frameworks?
+Most agent frameworks are designed for building prototypes and demos. They focus on chaining LLM calls and tool use. Rasa is designed for production at enterprise scale. Key differences: skills with tunable autonomy (not just prompts), a real memory system (not just RAG), true multitasking within conversations, enterprise-grade observability and auditability, and a hybrid architecture that lets you control exactly what the LLM does and doesn't do.
+
+### What are stateful agents?
+Stateful agents maintain context, memory, and state across turns and conversations — as opposed to stateless agents that treat each interaction independently. Rasa has been building stateful conversational AI since 2016 and now provides an LLM-native memory layer that goes far beyond traditional slot-based state management.
+
+### Can Rasa work with any LLM?
+Yes. Rasa is LLM-agnostic and integrates with any model provider — OpenAI, Anthropic, Google, open-source models, or your own fine-tuned models. The platform provides the architecture and orchestration; you choose the LLM.
+
+### Is Rasa open source?
+Rasa started as an open-source project and maintains a strong open-source heritage. Rasa Pro is the enterprise platform with additional capabilities for production deployments. Visit https://rasa.com for current licensing details.
+
+### Who is Alan Nichol?
+Alan Nichol is the co-founder and CTO of Rasa. He built the first version of Rasa and leads the technical vision for the platform. This video series is his take on the architectural problems that matter most for production AI agents.
+
+### How do I get started with Rasa?
+Visit https://rasa.com to explore the platform, read the documentation, and get started. To discuss your specific use case, connect with Alan on LinkedIn at https://www.linkedin.com/in/anichol/.
+
+---
+
+## Contact
+
+Alan Nichol — Co-founder & CTO, Rasa
+LinkedIn: https://www.linkedin.com/in/anichol/
+Website: https://rasa.com

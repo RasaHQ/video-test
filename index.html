@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rasa — The architecture of production AI agents</title>
+  <meta name="description" content="The building blocks of modern agent architecture — multitasking, memory, skills, self-improving agents — explained in 1 minute each. A video series from Rasa.">
+  <link rel="icon" type="image/svg+xml" href="assets/rasa_favicon.svg">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="The architecture of production AI agents — A video series from Rasa">
+  <meta property="og:description" content="Multitasking, memory, skills, self-improving agents — the building blocks of modern agent architecture, explained in 1 minute each. A video series by Alan Nichol, co-founder and CTO of Rasa.">
+  <meta property="og:image" content="https://2026.rasa.com/assets/thumbnails/multitasking.png">
+  <meta property="og:url" content="https://2026.rasa.com">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Rasa">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The architecture of production AI agents — A video series from Rasa">
+  <meta name="twitter:description" content="Multitasking, memory, skills, self-improving agents — the building blocks of modern agent architecture, explained in 1 minute each. A video series by Alan Nichol, co-founder and CTO of Rasa.">
+  <meta name="twitter:image" content="https://2026.rasa.com/assets/thumbnails/multitasking.png">
+
+  <!-- Preload hero video poster for speed -->
+  <link rel="preload" as="font" href="assets/fonts/Söhne-Buch.otf" type="font/otf" crossorigin>
+  <link rel="preload" as="font" href="assets/fonts/Söhne-Dreiviertelfett.otf" type="font/otf" crossorigin>
+
+  <style>
+    @font-face {
+      font-family: 'Söhne';
+      src: url('assets/fonts/Söhne-Buch.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Söhne';
+      src: url('assets/fonts/Söhne-Kräftig.otf') format('opentype');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Söhne';
+      src: url('assets/fonts/Söhne-Dreiviertelfett.otf') format('opentype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Söhne Mono';
+      src: url('assets/fonts/SohneMono-Buch.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'Söhne Mono';
+      src: url('assets/fonts/SohneMono-Kraftig.otf') format('opentype');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080327;
+      --bg-surface: rgba(255,255,255,0.04);
+      --bg-surface-hover: rgba(255,255,255,0.07);
+      --purple: #5a17ee;
+      --purple-glow: rgba(90,23,238,0.4);
+      --lilac: #A6AAF3;
+      --lilac-pale: #DADCFB;
+      --aqua: #71EFF3;
+      --text: #eeeef2;
+      --text-dim: rgba(255,255,255,0.55);
+      --text-muted: rgba(255,255,255,0.25);
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.15);
+      --display: 'Söhne', -apple-system, sans-serif;
+      --body: 'Söhne', -apple-system, sans-serif;
+      --mono: 'Söhne Mono', monospace;
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Ambient background ────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(ellipse, rgba(90,23,238,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Layout ────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Nav ───────────────────────────────────── */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 0;
+    }
+
+    .nav-logo svg {
+      height: 20px;
+      width: auto;
+      opacity: 0.5;
+    }
+
+    .nav-link {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover { color: var(--lilac); }
+
+    /* ── Hero ──────────────────────────────────── */
+    .hero {
+      padding: 4rem 0 1rem;
+    }
+
+    .hero-provocation {
+      font-family: var(--display);
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-provocation .dim {
+      color: var(--text-dim);
+    }
+
+    .hero-body {
+      font-family: var(--body);
+      font-size: 1.0625rem;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--text-dim);
+      max-width: 520px;
+    }
+
+    /* ── Series Section ───────────────────────── */
+    .series {
+      padding: 3.5rem 0 2rem;
+    }
+
+    .series-label {
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── Video Entry ──────────────────────────── */
+    .video-entry {
+      margin-bottom: 3.5rem;
+    }
+
+    .video-entry-hook {
+      font-family: var(--display);
+      font-size: 1.375rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .video-entry-sub {
+      font-family: var(--body);
+      font-size: 0.9375rem;
+      font-weight: 400;
+      line-height: 1.55;
+      color: var(--text-dim);
+      margin-bottom: 1.25rem;
+      max-width: 520px;
+    }
+
+    .video-player-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .video-player-wrap:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+
+    .video-player-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.2);
+      transition: opacity 0.3s ease, background 0.3s ease;
+    }
+
+    .video-player-wrap:hover .play-overlay {
+      background: rgba(0,0,0,0.35);
+    }
+
+    .play-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .play-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+    }
+
+    .video-player-wrap:hover .play-btn {
+      background: rgba(255,255,255,0.18);
+      transform: scale(1.06);
+    }
+
+    .play-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: #fff;
+      margin-left: 3px;
+    }
+
+    .video-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .video-meta-tag {
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--lilac);
+      background: rgba(166,170,243,0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .video-meta-duration {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Coming Soon ─────────────────────────── */
+    .coming-soon-entry {
+      margin-bottom: 3.5rem;
+      opacity: 0.45;
+    }
+
+    .coming-soon-entry .video-entry-hook {
+      color: var(--text-dim);
+    }
+
+    .coming-soon-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 0.25rem 0.625rem;
+      border-radius: 4px;
+      margin-top: 0.25rem;
+    }
+
+    /* ── Divider ──────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1rem 0 3.5rem;
+    }
+
+    /* ── CTA Section ─────────────────────────── */
+    .cta-section {
+      padding: 2rem 0 5rem;
+      text-align: center;
+    }
+
+    .cta-question {
+      font-family: var(--display);
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      font-weight: 600;
+      line-height: 1.2;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .cta-sub {
+      font-family: var(--body);
+      font-size: 1rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.625rem;
+      font-family: var(--body);
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--purple);
+      border: none;
+      border-radius: 10px;
+      padding: 1rem 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 0 0 var(--purple-glow);
+    }
+
+    .cta-button:hover {
+      background: #6b2bf5;
+      box-shadow: 0 4px 28px var(--purple-glow);
+      transform: translateY(-2px);
+    }
+
+    .cta-button svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .cta-linkedin {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--body);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .cta-linkedin:hover {
+      color: var(--lilac);
+    }
+
+    .cta-linkedin svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .cta-divider {
+      width: 48px;
+      height: 1px;
+      background: var(--border);
+      margin: 2.5rem auto;
+    }
+
+    .cta-question-secondary {
+      font-family: var(--display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Footer ────────────────────────────────── */
+    .footer {
+      text-align: center;
+      padding: 0 0 3rem;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+    }
+
+    .footer a {
+      color: var(--text-dim);
+      text-decoration: none;
+    }
+
+    .footer a:hover { color: var(--lilac); }
+
+    /* ── Lightbox ──────────────────────────────── */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.94);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lightbox-inner {
+      position: relative;
+      width: 90vmin;
+      max-width: 720px;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+
+    .lightbox-inner video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+      transition: background 0.2s;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .lightbox-close svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* ── End Card ──────────────────────────────── */
+    .end-card {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      z-index: 2;
+      transform: translateY(100%);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .end-card.visible {
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .end-card-inner {
+      height: 100%;
+      background: linear-gradient(to top, rgba(8,3,39,1) 65%, rgba(8,3,39,0.97) 85%, rgba(8,3,39,0.8));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 1.75rem 1.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-evenly;
+      gap: 0;
+    }
+
+    /* ── Vote Section ─────────────────────────── */
+    .end-card-vote {
+      text-align: center;
+      transition: opacity 0.3s ease;
+    }
+
+    .end-card-vote.hidden { display: none; }
+
+    .end-card-vote-label {
+      font-family: var(--display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--aqua);
+      margin-bottom: 1rem;
+    }
+
+    .end-card-vote-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.625rem;
+    }
+
+    .vote-option {
+      font-family: var(--body);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(113,239,243,0.08);
+      border: 1px solid rgba(113,239,243,0.25);
+      border-radius: 8px;
+      padding: 0.625rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .vote-option:hover {
+      background: rgba(113,239,243,0.18);
+      border-color: rgba(113,239,243,0.5);
+      color: #fff;
+    }
+
+    .vote-option.selected {
+      background: var(--aqua);
+      border-color: var(--aqua);
+      color: var(--bg);
+    }
+
+    /* ── Email Capture (after vote) ───────────── */
+    .end-card-email {
+      text-align: center;
+      display: none;
+    }
+
+    .end-card-email.visible { display: block; }
+
+    .end-card-email-label {
+      font-family: var(--body);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .end-card-email-form {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    .end-card-email-input {
+      flex: 1;
+      font-family: var(--body);
+      font-size: 0.9375rem;
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      min-width: 0;
+    }
+
+    .end-card-email-input::placeholder { color: var(--text-muted); }
+    .end-card-email-input:focus { border-color: var(--aqua); }
+
+    .end-card-email-submit {
+      font-family: var(--body);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--bg);
+      background: var(--aqua);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .end-card-email-submit:hover {
+      background: #8cf4f7;
+      box-shadow: 0 4px 20px rgba(113,239,243,0.3);
+    }
+
+    .end-card-email-skip {
+      font-family: var(--body);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-top: 0.625rem;
+      transition: color 0.2s;
+    }
+
+    .end-card-email-skip:hover { color: var(--text-dim); }
+
+    /* ── Thank You ────────────────────────────── */
+    .end-card-thanks {
+      text-align: center;
+      display: none;
+    }
+
+    .end-card-thanks.visible { display: block; }
+
+    .end-card-thanks-msg {
+      font-family: var(--display);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--aqua);
+    }
+
+    /* ── Bottom row: question + up next ───────── */
+    .end-card-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      width: 100%;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .end-card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--body);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .end-card-cta:hover {
+      color: #fff;
+    }
+
+    .end-card-cta svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .end-card-sep {
+      width: 1px;
+      height: 1.75rem;
+      background: rgba(255,255,255,0.18);
+    }
+
+    .end-card-next {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      background: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .end-card-next:hover .end-card-next-title {
+      color: #fff;
+    }
+
+    .end-card-next-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 5px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.06);
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .end-card-next-thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .end-card-next-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .end-card-next-label {
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.45);
+      line-height: 1;
+    }
+
+    .end-card-next-title {
+      font-family: var(--body);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    /* ── Scroll Fade-in ───────────────────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Responsive ────────────────────────────── */
+    @media (max-width: 640px) {
+      .page { padding: 0 1.25rem; }
+      .hero { padding: 2.5rem 0 0.5rem; }
+      .series { padding: 2.5rem 0 1rem; }
+      .video-entry { margin-bottom: 2.5rem; }
+      .video-entry-hook { font-size: 1.25rem; }
+      .lightbox-inner { width: 95vw; max-width: none; }
+      .play-btn { width: 56px; height: 56px; }
+      .play-btn svg { width: 20px; height: 20px; }
+
+      /* End card covers full video on mobile */
+      .end-card {
+        height: 100%;
+      }
+      .end-card-inner {
+        padding: 2.5rem 1.5rem 1.5rem;
+        background: rgba(8,3,39,0.97);
+      }
+      .end-card-vote-label { font-size: 1.125rem; }
+      .end-card-row { flex-direction: column; gap: 0.75rem; }
+      .end-card-sep { display: none; }
+      .end-card-email-form { flex-direction: column; }
+      .vote-option { font-size: 0.875rem; padding: 0.625rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+
+    <!-- ═══ NAV ═══ -->
+    <nav class="nav">
+      <a href="https://rasa.com" class="nav-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 287.8 141"><defs><style>.l{fill:#fff;}</style></defs><g><path class="l" d="M209.4,29V79.11h12V64h26V79h12V29Zm38,23h-26V41h26Z"/><polygon class="l" points="198.4 56.5 198.4 69 198.4 79 149.4 79 149.4 67 186.4 67 186.4 60 149.4 60 149.4 49 149.4 36.5 149.4 29 198.4 29 198.4 41 161.4 41 161.4 48 198.4 48 198.4 56.5 198.4 56.5"/><path class="l" d="M88.4,29V79.11h12V64h26V79h12V29Zm38,23h-26V41h26Z"/><path class="l" d="M61.31,59.94l15.36-5.59.73-.29V29h-49V79H40.24V67.59l9-3.26L62.79,79H77.61Zm-21-5.12V41H65.4v4.68Z"/><path class="l" d="M246.05,90.54H270V18.44H17.84v72.1h180L246,114.36V90.54ZM4.4,5h279v99H259.49v32l-64.77-32H4.4Z"/></g></svg>
+      </a>
+      <a href="https://rasa.com" class="nav-link">rasa.com &rarr;</a>
+    </nav>
+
+    <!-- ═══ HERO ═══ -->
+    <section class="hero">
+      <h1 class="hero-provocation">
+        The architecture of<br>
+        <span class="dim">production AI agents.</span>
+      </h1>
+      <p class="hero-body">
+        The elements of a modern agent architecture, explained in&nbsp;1&nbsp;minute&nbsp;each.
+      </p>
+    </section>
+
+    <!-- ═══ VIDEO SERIES ═══ -->
+    <section class="series">
+      <div class="series-label">The Series</div>
+
+      <!-- ── 1. MULTITASKING ── -->
+      <div class="video-entry fade-in" data-video-id="multitasking">
+        <div class="video-entry-hook">Filing a claim, arranging a courtesy car, answering questions — all at once.</div>
+        <div class="video-entry-sub">
+          Watch an agent handle a full insurance claim. While the customer uploads photos, the agent arranges a rental and answers follow-up questions in parallel. "Oh, already? Wow, thanks so much."
+        </div>
+        <div class="video-player-wrap" data-video-id="multitasking">
+          <video src="assets/videos/multitasking.mp4" poster="assets/thumbnails/multitasking-square.png" muted playsinline preload="metadata"></video>
+          <div class="play-overlay">
+            <div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+          </div>
+        </div>
+        <div class="video-meta">
+          <span class="video-meta-tag">Multitasking</span>
+          <span class="video-meta-duration">1:16</span>
+        </div>
+      </div>
+
+      <!-- ── 2. MEMORY ── -->
+      <div class="video-entry fade-in" data-video-id="memory">
+        <div class="video-entry-hook">The shift from slots to memory is as big as intents to LLMs.</div>
+        <div class="video-entry-sub">
+          Not a database — a memory. It learns what matters across skills, channels, and conversations without being told what to look for. When a customer comes back on a different channel, the conversation picks up where it left off.
+        </div>
+        <div class="video-player-wrap" data-video-id="memory">
+          <video src="assets/videos/memory.mp4" poster="assets/thumbnails/memory-square.png" muted playsinline preload="metadata"></video>
+          <div class="play-overlay">
+            <div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+          </div>
+        </div>
+        <div class="video-meta">
+          <span class="video-meta-tag">Memory</span>
+          <span class="video-meta-duration">1:24</span>
+        </div>
+      </div>
+
+      <!-- ── 3. SKILLS ── -->
+      <div class="video-entry fade-in" data-video-id="skills">
+        <div class="video-entry-hook">Too many agent architectures rely on prompt and pray.</div>
+        <div class="video-entry-sub">
+          Rasa skills sit on a spectrum from fully controlled to fully autonomous. Build once, compose freely, test in isolation.
+        </div>
+        <div class="video-player-wrap" data-video-id="skills">
+          <video src="assets/videos/Rasa-skills-v2-render.mp4" poster="assets/thumbnails/skills-square.png" muted playsinline preload="metadata"></video>
+          <div class="play-overlay">
+            <div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+          </div>
+        </div>
+        <div class="video-meta">
+          <span class="video-meta-tag">Skills</span>
+          <span class="video-meta-duration">1:18</span>
+        </div>
+      </div>
+
+      <!-- ── 4. SELF-IMPROVING AGENTS ── -->
+      <div class="video-entry fade-in" data-video-id="self-improving">
+        <div class="video-entry-hook">Are you in control, or trusting a black box?</div>
+        <div class="video-entry-sub">
+          Every conversation your agent handles is signal. Rasa gives your coding agent the context to diagnose what went wrong, write the fix, and test it — before a real user ever sees it. Your automation compounds.
+        </div>
+        <div class="video-player-wrap" data-video-id="self-improving">
+          <video src="assets/videos/self-improving.mp4" poster="assets/thumbnails/self-improving-square.png" muted playsinline preload="metadata"></video>
+          <div class="play-overlay">
+            <div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg></div>
+          </div>
+        </div>
+        <div class="video-meta">
+          <span class="video-meta-tag">Self-Improving Agents</span>
+          <span class="video-meta-duration">1:03</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── 5. ORCHESTRATION (COMING SOON) ── -->
+      <div class="coming-soon-entry fade-in">
+        <div class="video-entry-hook">Orchestration</div>
+        <div class="coming-soon-badge">Coming soon</div>
+      </div>
+
+    </section>
+
+    <!-- ═══ CTA ═══ -->
+    <section class="cta-section fade-in">
+      <div class="cta-question">Curious about what's next?</div>
+      <a href="https://www.linkedin.com/in/anichol/"
+         class="cta-linkedin" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        Follow along on LinkedIn
+      </a>
+
+      <div class="cta-divider"></div>
+
+      <div class="cta-question-secondary">Have a question?</div>
+      <a href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ2SuCZYTOj30T4IEy_-q0yH2JeO6Z-FyVVTOXUPExWvNVp1zivZrHbdtxaIhpQyhInU3FQn0slr"
+         class="cta-button" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Book your call with Alan
+      </a>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer">
+      <a href="https://rasa.com">&copy; Rasa Technologies 2026</a>
+    </footer>
+
+  </div>
+
+  <!-- ═══ LIGHTBOX ═══ -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="lightbox-inner">
+      <video id="lightboxVideo" controls playsinline></video>
+      <div class="end-card" id="endCard">
+        <div class="end-card-inner">
+
+          <!-- State 1: Vote -->
+          <div class="end-card-vote" id="endCardVote">
+            <div class="end-card-vote-label">Vote for the next video in this series</div>
+            <div class="end-card-vote-options" id="voteOptions">
+              <button class="vote-option" data-topic="Multi-agent orchestration">Multi-agent orchestration</button>
+              <button class="vote-option" data-topic="Voice agents">Voice agents</button>
+              <button class="vote-option" data-topic="Evaluation & analytics">Evaluation &amp; analytics</button>
+            </div>
+          </div>
+
+          <!-- State 2: Email capture -->
+          <div class="end-card-email" id="endCardEmail">
+            <div class="end-card-email-label">Nice pick. Want us to let you know when it's ready?</div>
+            <div class="end-card-email-form">
+              <input type="email" class="end-card-email-input" id="endCardEmailInput" placeholder="your@email.com" autocomplete="email">
+              <button class="end-card-email-submit" id="endCardEmailSubmit">Notify me</button>
+            </div>
+          </div>
+
+          <!-- State 3: Thank you -->
+          <div class="end-card-thanks" id="endCardThanks">
+            <div class="end-card-thanks-msg" id="endCardThanksMsg">Thanks — we'll let you know.</div>
+          </div>
+
+          <!-- Always visible: question + up next -->
+          <div class="end-card-row">
+            <a id="endCardCta"
+               href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ2SuCZYTOj30T4IEy_-q0yH2JeO6Z-FyVVTOXUPExWvNVp1zivZrHbdtxaIhpQyhInU3FQn0slr"
+               class="end-card-cta" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Have a question? Talk to Alan
+            </a>
+            <div class="end-card-sep"></div>
+            <div class="end-card-next" id="endCardNext">
+              <div class="end-card-next-thumb">
+                <video id="endCardNextThumb" muted playsinline preload="metadata"></video>
+              </div>
+              <div class="end-card-next-info">
+                <div class="end-card-next-label">Up next</div>
+                <div class="end-card-next-title" id="endCardNextTitle"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Video Data ──────────────────────────────
+    const VIDEOS = [
+      {
+        id: 'multitasking',
+        title: 'Multitasking',
+        src: 'assets/videos/multitasking.mp4',
+        duration: '1:16',
+      },
+      {
+        id: 'memory',
+        title: 'Memory',
+        src: 'assets/videos/memory.mp4',
+        duration: '1:24',
+      },
+      {
+        id: 'skills',
+        title: 'Skills',
+        src: 'assets/videos/Rasa-skills-v2-render.mp4',
+        duration: '1:18',
+      },
+      {
+        id: 'self-improving',
+        title: 'Self-Improving Agents',
+        src: 'assets/videos/self-improving.mp4',
+        duration: '1:03',
+      },
+      {
+        id: 'orchestration',
+        title: 'Orchestration',
+        src: null,
+        comingSoon: true,
+      },
+    ];
+
+    const CALENDAR_URL = 'https://calendar.google.com/calendar/appointments/schedules/AcZssZ2SuCZYTOj30T4IEy_-q0yH2JeO6Z-FyVVTOXUPExWvNVp1zivZrHbdtxaIhpQyhInU3FQn0slr';
+
+    // ── State ───────────────────────────────────
+    let currentVideoId = null;
+    let endCardShown = false;
+
+    // ── Scroll Fade-in ─────────────────────────
+    const fadeEls = document.querySelectorAll('.fade-in');
+    const fadeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          fadeObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    fadeEls.forEach(el => fadeObserver.observe(el));
+
+    // ── Inline Video Tap → Lightbox ────────────
+    document.querySelectorAll('.video-player-wrap').forEach(wrap => {
+      wrap.addEventListener('click', () => {
+        const videoId = wrap.dataset.videoId;
+        if (videoId) openLightbox(videoId);
+      });
+    });
+
+    // ── Lightbox ────────────────────────────────
+    const lightbox = document.getElementById('lightbox');
+    const lightboxVideo = document.getElementById('lightboxVideo');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const endCard = document.getElementById('endCard');
+    const endCardNext = document.getElementById('endCardNext');
+    const endCardNextTitle = document.getElementById('endCardNextTitle');
+    const endCardNextThumb = document.getElementById('endCardNextThumb');
+
+    function getNextPlayableVideo(currentId) {
+      const currentIdx = VIDEOS.findIndex(v => v.id === currentId);
+      for (let i = 1; i < VIDEOS.length; i++) {
+        const candidate = VIDEOS[(currentIdx + i) % VIDEOS.length];
+        if (candidate.src) return candidate;
+      }
+      return null;
+    }
+
+    function openLightbox(videoId) {
+      const video = VIDEOS.find(v => v.id === videoId);
+      if (!video || !video.src) return;
+
+      currentVideoId = videoId;
+      endCardShown = false;
+      endCard.classList.remove('visible');
+      resetVoteState();
+      currentVoteId = null;
+      lightboxVideo.src = video.src;
+      lightbox.classList.add('open');
+      lightboxVideo.play().catch(() => {});
+
+      // Update URL
+      const newPath = '/' + videoId;
+      if (window.location.pathname !== newPath) {
+        history.pushState({ videoId }, '', newPath);
+      }
+
+      // Prepare end card
+      const next = getNextPlayableVideo(videoId);
+      if (next) {
+        endCardNextTitle.textContent = next.title;
+        endCardNextThumb.src = next.src;
+        endCardNext.style.display = 'flex';
+      } else {
+        endCardNext.style.display = 'none';
+      }
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      endCardShown = false;
+      endCard.classList.remove('visible');
+      lightboxVideo.pause();
+      lightboxVideo.src = '';
+      currentVideoId = null;
+
+      if (window.location.pathname !== '/') {
+        history.pushState({}, '', '/');
+      }
+    }
+
+    // End card 5s before video ends
+    lightboxVideo.addEventListener('timeupdate', () => {
+      if (!lightboxVideo.duration) return;
+      const remaining = lightboxVideo.duration - lightboxVideo.currentTime;
+      if (remaining <= 5 && !endCardShown) {
+        endCardShown = true;
+        endCard.classList.add('visible');
+      }
+    });
+
+    lightboxVideo.addEventListener('seeking', () => {
+      if (!lightboxVideo.duration) return;
+      const remaining = lightboxVideo.duration - lightboxVideo.currentTime;
+      if (remaining > 5) {
+        endCardShown = false;
+        endCard.classList.remove('visible');
+      }
+    });
+
+    endCardNext.addEventListener('click', () => {
+      const next = getNextPlayableVideo(currentVideoId);
+      if (next) openLightbox(next.id);
+    });
+
+    // ── Vote → Email → Thanks flow ─────────────
+    const endCardVote = document.getElementById('endCardVote');
+    const endCardEmail = document.getElementById('endCardEmail');
+    const endCardThanks = document.getElementById('endCardThanks');
+    const endCardThanksMsg = document.getElementById('endCardThanksMsg');
+    const endCardEmailInput = document.getElementById('endCardEmailInput');
+    const endCardEmailSubmit = document.getElementById('endCardEmailSubmit');
+    const endCardEmailSkip = document.getElementById('endCardEmailSkip');
+    const voteOptions = document.getElementById('voteOptions');
+
+    let selectedTopic = null;
+
+    function resetVoteState() {
+      selectedTopic = null;
+      endCardVote.classList.remove('hidden');
+      endCardEmail.classList.remove('visible');
+      endCardThanks.classList.remove('visible');
+      endCardEmailInput.value = '';
+      voteOptions.querySelectorAll('.vote-option').forEach(btn => btn.classList.remove('selected'));
+    }
+
+    // Send vote to API
+    let currentVoteId = null;
+
+    function submitVote() {
+      const payload = { topic: selectedTopic, video: currentVideoId };
+      fetch('/api/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(r => r.json())
+        .then(data => { if (data.voteId) currentVoteId = data.voteId; })
+        .catch(() => {});
+    }
+
+    function submitEmail(email) {
+      if (!currentVoteId || !email) return;
+      fetch('/api/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: selectedTopic, voteId: currentVoteId, email }),
+      }).catch(() => {});
+    }
+
+    // Vote click — log immediately, then offer optional email
+    voteOptions.addEventListener('click', (e) => {
+      const btn = e.target.closest('.vote-option');
+      if (!btn) return;
+      selectedTopic = btn.dataset.topic;
+      btn.classList.add('selected');
+      submitVote();
+      setTimeout(() => {
+        endCardVote.classList.add('hidden');
+        endCardEmail.classList.add('visible');
+        endCardEmailInput.focus();
+      }, 300);
+    });
+
+    // Email submit — updates existing vote record
+    endCardEmailSubmit.addEventListener('click', () => {
+      const email = endCardEmailInput.value.trim();
+      if (!email) return;
+      submitEmail(email);
+      endCardEmail.classList.remove('visible');
+      endCardThanksMsg.textContent = "Thanks — we'll let you know.";
+      endCardThanks.classList.add('visible');
+    });
+
+    // Enter key submits email
+    endCardEmailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') endCardEmailSubmit.click();
+    });
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    // ── Deep Linking ────────────────────────────
+    (function handleDeepLink() {
+      const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+      if (path) {
+        const video = VIDEOS.find(v => v.id === path && v.src);
+        if (video) {
+          setTimeout(() => openLightbox(video.id), 100);
+        }
+      }
+    })();
+
+    window.addEventListener('popstate', (e) => {
+      const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+      if (path) {
+        const video = VIDEOS.find(v => v.id === path && v.src);
+        if (video) {
+          openLightbox(video.id);
+        } else {
+          closeLightbox();
+        }
+      } else {
+        closeLightbox();
+      }
+    });
+  </script>
+
+</body>
+</html>
