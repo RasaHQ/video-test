@@ -1768,7 +1768,7 @@
     currentVoteId = null;
     lightboxVideo.src = v.src;
     lightbox.classList.add('open');
-    lightboxVideo.play().then(() => { trackEvent('play', id); }).catch(()=>{});
+    lightboxVideo.play().catch(()=>{});
     const newPath = '/' + id;
     if (window.location.pathname !== newPath) {
       history.pushState({ videoId: id }, '', newPath);
@@ -1804,6 +1804,9 @@
     if (pct >= 25) trackMilestone(currentVideoId, pct, 'play_25');
     if (pct >= 50) trackMilestone(currentVideoId, pct, 'play_50');
     if (pct >= 75) trackMilestone(currentVideoId, pct, 'play_75');
+  });
+  lightboxVideo.addEventListener('playing', () => {
+    trackMilestone(currentVideoId, 0, 'play');
   });
   lightboxVideo.addEventListener('ended', () => {
     trackMilestone(currentVideoId, 100, 'complete');
