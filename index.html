@@ -1200,6 +1200,37 @@
     .lightbox-close:hover { background: rgba(255,255,255,0.12); border-color: var(--accent-line); }
     .lightbox-close svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
 
+    .lightbox-play-btn {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.25);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .lightbox-play-btn:hover {
+      background: rgba(255,255,255,0.25);
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+    .lightbox-play-btn svg {
+      width: 32px; height: 32px;
+      fill: #fff;
+      margin-left: 4px;
+    }
+    .lightbox-play-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     .end-card {
       position: absolute; bottom: 0; left: 0; right: 0;
       height: 55%;
@@ -1627,6 +1658,9 @@
   </button>
   <div class="lightbox-inner">
     <video id="lightboxVideo" controls playsinline></video>
+    <button class="lightbox-play-btn hidden" id="lightboxPlayBtn" aria-label="Play video">
+      <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+    </button>
     <div class="end-card" id="endCard">
       <div class="end-card-inner">
 
@@ -1718,6 +1752,7 @@
   const lightbox = document.getElementById('lightbox');
   const lightboxVideo = document.getElementById('lightboxVideo');
   const lightboxClose = document.getElementById('lightboxClose');
+  const lightboxPlayBtn = document.getElementById('lightboxPlayBtn');
   const endCard = document.getElementById('endCard');
   const endCardNext = document.getElementById('endCardNext');
   const endCardNextTitle = document.getElementById('endCardNextTitle');
@@ -1768,7 +1803,13 @@
     currentVoteId = null;
     lightboxVideo.src = v.src;
     lightbox.classList.add('open');
-    lightboxVideo.play().catch(()=>{});
+    lightboxPlayBtn.classList.remove('hidden');
+    lightboxVideo.play().then(() => {
+      lightboxPlayBtn.classList.add('hidden');
+    }).catch(()=>{
+      // Autoplay blocked — show big play button for user to click
+      lightboxPlayBtn.classList.remove('hidden');
+    });
     const newPath = '/' + id;
     if (window.location.pathname !== newPath) {
       history.pushState({ videoId: id }, '', newPath);
@@ -1806,7 +1847,11 @@
     if (pct >= 75) trackMilestone(currentVideoId, pct, 'play_75');
   });
   lightboxVideo.addEventListener('playing', () => {
+    lightboxPlayBtn.classList.add('hidden');
     trackMilestone(currentVideoId, 0, 'play');
+  });
+  lightboxPlayBtn.addEventListener('click', () => {
+    lightboxVideo.play().catch(()=>{});
   });
   lightboxVideo.addEventListener('ended', () => {
     trackMilestone(currentVideoId, 100, 'complete');
