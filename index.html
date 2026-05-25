@@ -1724,6 +1724,28 @@
 
   let currentVideoId = null;
   let endCardShown = false;
+  let trackingCode = null;
+  const firedEvents = new Set();
+
+  function trackEvent(event, videoId) {
+    const payload = {
+      tracking_code: trackingCode || null,
+      video_id: videoId || currentVideoId,
+      event: event,
+    };
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  }
+
+  function trackMilestone(videoId, pct, eventName) {
+    const key = `${videoId}_${eventName}`;
+    if (firedEvents.has(key)) return;
+    firedEvents.add(key);
+    trackEvent(eventName, videoId);
+  }
 
   function getNextPlayable(id){
     const i = VIDEOS.findIndex(v => v.id === id);
@@ -1739,12 +1761,13 @@
     if (!v || !v.src) return;
     currentVideoId = id;
     endCardShown = false;
+    firedEvents.clear();
     endCard.classList.remove('visible');
     resetVoteState();
     currentVoteId = null;
     lightboxVideo.src = v.src;
     lightbox.classList.add('open');
-    lightboxVideo.play().catch(()=>{});
+    lightboxVideo.play().then(() => { trackEvent('play', id); }).catch(()=>{});
     const newPath = '/' + id;
     if (window.location.pathname !== newPath) {
       history.pushState({ videoId: id }, '', newPath);
@@ -1775,12 +1798,21 @@
       endCardShown = true;
       endCard.classList.add('visible');
     }
+    // Milestone tracking
+    const pct = (lightboxVideo.currentTime / lightboxVideo.duration) * 100;
+    if (pct >= 25) trackMilestone(currentVideoId, pct, 'play_25');
+    if (pct >= 50) trackMilestone(currentVideoId, pct, 'play_50');
+    if (pct >= 75) trackMilestone(currentVideoId, pct, 'play_75');
+  });
+  lightboxVideo.addEventListener('ended', () => {
+    trackMilestone(currentVideoId, 100, 'complete');
   });
   lightboxVideo.addEventListener('seeking', () => {
     if (!lightboxVideo.duration) return;
     const remaining = lightboxVideo.duration - lightboxVideo.currentTime;
     if (remaining > 5) {
       endCardShown = false;
+      firedEvents.clear();
       endCard.classList.remove('visible');
     }
   });
@@ -1853,17 +1885,27 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 
   // Deep link
+  function parseVideoPath(pathname) {
+    const segments = pathname.replace(/^\//, '').replace(/\/$/, '').split('/');
+    const videoId = segments[0] || null;
+    const code = segments[1] || null;
+    return { videoId, code };
+  }
   (function(){
-    const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-    if (path){
-      const v = VIDEOS.find(v => v.id === path && v.src);
-      if (v) setTimeout(() => openLightbox(v.id), 120);
+    const { videoId, code } = parseVideoPath(window.location.pathname);
+    if (code) trackingCode = code;
+    if (videoId){
+      const v = VIDEOS.find(v => v.id === videoId && v.src);
+      if (v) {
+        trackEvent('page_load', v.id);
+        setTimeout(() => openLightbox(v.id), 120);
+      }
     }
   })();
   window.addEventListener('popstate', () => {
-    const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
-    if (path){
-      const v = VIDEOS.find(v => v.id === path && v.src);
+    const { videoId } = parseVideoPath(window.location.pathname);
+    if (videoId){
+      const v = VIDEOS.find(v => v.id === videoId && v.src);
       if (v) openLightbox(v.id); else closeLightbox();
     } else closeLightbox();
   });

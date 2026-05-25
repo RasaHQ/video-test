@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    { "source": "/skills/:code", "destination": "/index.html" },
+    { "source": "/memory/:code", "destination": "/index.html" },
+    { "source": "/multitasking/:code", "destination": "/index.html" },
+    { "source": "/self-improving/:code", "destination": "/index.html" },
     { "source": "/skills", "destination": "/index.html" },
     { "source": "/memory", "destination": "/index.html" },
     { "source": "/orchestration", "destination": "/index.html" },

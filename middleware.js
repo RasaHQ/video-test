@@ -1,20 +1,20 @@
 const OG_DATA = {
-  '/multitasking': {
+  'multitasking': {
     title: 'Multitasking — Three tasks, one call. Watch an AI agent in action.',
     description: 'Filing a claim, arranging a courtesy car, answering questions — all at once. See a Rasa agent handle a full insurance claim in parallel. 75 seconds.',
     image: '/assets/thumbnails/multitasking.png',
   },
-  '/memory': {
+  'memory': {
     title: 'Memory — The shift from slots to memory is as big as intents to LLMs.',
     description: 'Not a database — a memory. See how Rasa agents build memory on their own, across skills, channels, and conversations, without being told what to look for.',
     image: '/assets/thumbnails/memory.png',
   },
-  '/skills': {
+  'skills': {
     title: 'Skills — A spectrum from fully controlled to fully autonomous.',
     description: 'Rasa skills sit on a spectrum from fully controlled to fully autonomous. Build once, compose freely, test in isolation. See how it works in 75 seconds.',
     image: '/assets/thumbnails/skills.png',
   },
-  '/self-improving': {
+  'self-improving': {
     title: 'Self-Improving Agents — Are you in control, or trusting a black box?',
     description: 'Every conversation is signal. Rasa gives your coding agent the context to diagnose failures, write fixes, and test them — before users ever see it. Your automation compounds.',
     image: '/assets/thumbnails/self-improving-square.png',
@@ -25,7 +25,11 @@ export default function middleware(request) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  const og = OG_DATA[path];
+  // Extract video name from path — handles both /memory and /memory/a56k
+  const segments = path.replace(/^\//, '').replace(/\/$/, '').split('/');
+  const videoName = segments[0];
+
+  const og = OG_DATA[videoName];
   if (!og) return;
 
   return fetch(new URL('/index.html', request.url))
@@ -59,5 +63,5 @@ export default function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/multitasking', '/memory', '/skills', '/self-improving'],
+  matcher: ['/multitasking', '/memory', '/skills', '/self-improving', '/multitasking/:code', '/memory/:code', '/skills/:code', '/self-improving/:code'],
 };
