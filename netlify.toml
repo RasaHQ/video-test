@@ -1,0 +1,60 @@
+# Netlify configuration for 2026.rasa.com
+# Ported from vercel.json + middleware.js + api/vote.js + api/track.js
+
+[build]
+  # Static site — nothing to compile. Serve the repo root.
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Deep-link video routes resolve to the single-page app entry.
+# On the video routes the og-inject edge function runs first and returns
+# index.html with custom OG tags (an edge-function response skips redirects);
+# these rewrites are the fallback and the sole handler for /orchestration.
+# The `:code` variants mirror the tracking-code deep links from vercel.json.
+[[redirects]]
+  from = "/skills/:code"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/memory/:code"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/multitasking/:code"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/self-improving/:code"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/skills"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/memory"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/orchestration"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/multitasking"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/self-improving"
+  to = "/index.html"
+  status = 200
